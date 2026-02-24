@@ -1,0 +1,195 @@
+#include "linked_list.h"
+#include <stdexcept>
+
+template <class T>
+LinkedList<T>::LinkedList(T* items, int count): length(count), head(nullptr), tail(nullptr) { // Создать список из списка элементов и их количества
+
+    if (length == 0) return;
+
+    head = new Node<T>{items[0], nullptr}; // Первый узел
+    tail = head; // смотрит за концом
+    
+    for (int i = 1; i < length; i++) {
+        tail->next = new Node<T>{items[i], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
+        tail = tail->next // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
+    }
+
+}
+
+template <class T>
+LinkedList<T>::LinkedList(): length(0), head(nullptr), tail(nullptr) { // Создать пустой список
+
+}
+
+template <class T>
+LinkedList<T>::LinkedList(const LinkedList<T>& other): length(other.length), head(nullptr), tail(nullptr) {
+
+    if (other.head == nullptr) return;
+
+    head = new Node<T>{other.head->data, nullptr};
+    tail = head;
+
+    Node<T>* current = other.head->next;
+
+    while (current != nullptr) {
+        tail->next = new Node<T>{current->data, nullptr};
+        tail = tail->next;
+        current = current->next;
+    }
+}
+
+template <class T>
+T LinkedList<T>::get_first() {
+    return head->data;
+}
+
+template <class T>
+T LinkedList<T>::get_last() {
+    return tail->data;
+}
+
+template <class T>
+T LinkedList<T>::get(int index) {
+    if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
+
+    Node<T>* current = head;
+
+    for (int i = 0; i < index; i++) {
+        current = current->next;
+    }
+
+    return current->data;
+}
+
+template <class T>
+int LinkedList<T>::get_length() {
+    return length;
+}
+
+template <class T>
+LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
+    if (start < 0 || end < 0 || start >= length || end >= length || start > end) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    LinkedList* sub_list = new LinkedList<T>();
+    sub_list->length = end - start + 1;
+
+    Node<T>* current = head;
+
+    for (int i = 0; i < start; i++) {
+        current = current->next;
+    }
+
+    sub_list->head = new Node<T>{current->data, nullptr};
+    sub_list->tail = sub_list->head;
+
+    for (int i = 0; i < end - start; i++) {
+        current = current->next;
+        sub_list->tail->next = new Node<T>{current->data, nullptr};
+        sub_list->tail = sub_list->tail->next;
+    }
+
+    return sub_list;
+}
+
+template <class T>
+void LinkedList<T>::append(T item) {
+
+    Node<T>* new_node = new Node<T>{item, nullptr};
+
+    if (head == nullptr) {
+        head = new_node;
+        tail = new_node;
+    } else {
+        tail->next = new_node;
+        tail = tail->next;    
+    }
+
+    length++;
+    return;
+}
+
+template <class T>
+void LinkedList<T>::prepend(T item) {
+
+    Node<T>* new_node = new Node<T>{item, nullptr};
+
+    if (head == nullptr) {
+        head = new_node;
+        tail = new_node;
+    } else {
+        new_node->next = head;  
+        head = new_node;
+    }
+
+    length++;
+    return;
+}
+
+template <class T>
+void LinkedList<T>::insert_at(T item, int index) {
+
+    if (index < 0 || index > length) {
+        throw std::out_of_range("Index out of range");
+    }
+
+    if (index == 0) {
+        prepend(item);
+        return;
+    }
+
+    if (index == length) {
+        append(item);
+        return;
+    }
+    
+    Node<T>* new_node = new Node<T>{item, nullptr};
+
+    Node<T>* current = head;
+
+    for (int i = 0; i < index - 1; i++) {
+        current = current->next;
+    }
+
+    new_node->next = current->next;
+    current->next = new_node;
+ 
+    length++;
+    return;
+}
+
+template <class T>
+LinkedList<T>* LinkedList<T>::concat(LinkedList<T>* other) {
+
+    LinkedList<T>* concat_list = new LinkedList<T>();
+
+    Node<T>* current = head;
+
+    for (int i = 0; i < length; i++) {
+        concat_list->append(current->data);
+        current = current->next;
+    }
+
+    current = other->head;
+
+    for (int i = 0; i < other->length; i++) {
+        concat_list->append(current->data);
+        current = current->next;
+    }
+
+    return concat_list;
+}
+
+template <class T>
+LinkedList<T>::~LinkedList() {
+    
+    Node<T>* current = head;
+
+    for (int i = 0; i < length; i++) {
+        Node<T>* tmp = current;
+        current = current->next;
+        delete tmp;
+    }
+
+}
