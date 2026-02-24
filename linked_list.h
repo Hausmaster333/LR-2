@@ -22,7 +22,6 @@ class LinkedList {
         T get_first();
         T get_last();
         T get(int index);
-
         int get_length();
 
         LinkedList<T>* get_sub_list(int start, int end);
