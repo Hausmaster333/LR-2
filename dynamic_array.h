@@ -8,6 +8,7 @@ class DynamicArray {
         int size;
 
     public:
+        DynamicArray();
         DynamicArray(int size);
         DynamicArray(T* items, int count);
         DynamicArray(const DynamicArray<T>& other);

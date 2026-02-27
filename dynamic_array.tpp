@@ -2,6 +2,11 @@
 #include <stdexcept>
 
 template <class T>
+DynamicArray<T>::DynamicArray() {
+    data = new T[4];
+}
+
+template <class T>
 DynamicArray<T>::DynamicArray(int size): size(size) {
     data = new T[size];
 }
