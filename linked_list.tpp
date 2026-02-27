@@ -11,7 +11,7 @@ LinkedList<T>::LinkedList(T* items, int count): length(count), head(nullptr), ta
     
     for (int i = 1; i < length; i++) {
         tail->next = new Node<T>{items[i], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
-        tail = tail->next // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
+        tail = tail->next; // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
     }
 
 }

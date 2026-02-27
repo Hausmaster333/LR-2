@@ -15,8 +15,8 @@ class LinkedList {
         int length;
     
     public:
-        LinkedList(T* items, int count);
         LinkedList();
+        LinkedList(T* items, int count);
         LinkedList(const LinkedList<T>& other);
 
         T get_first();
