@@ -7,9 +7,9 @@
 template <class T>
 class Sequence {
     public:
-        virtual T get_first() = 0;
-        virtual T get_last() = 0;
-        virtual T get(int index) = 0;
+        virtual T get_first() const = 0;
+        virtual T get_last() const = 0;
+        virtual T get(int index) const = 0; // Итератор, убрать get в аррей. Сделать интератор + передавать константные ссылки 
         virtual int get_count() = 0;
 
         virtual Sequence<T>* get_sub_sequence(int start, int end) = 0;
@@ -29,7 +29,7 @@ class ArraySequence : public Sequence<T> {
         int count;
     public:
         ArraySequence();
-        ArraySequence(T* items, int count);
+        ArraySequence(const T* items, int count);
         ArraySequence(const DynamicArray<T>& other);
         ArraySequence(const ArraySequence<T>& other);
 
