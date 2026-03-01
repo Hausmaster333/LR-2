@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 template <class T>
-DynamicArray<T>::DynamicArray() {
+DynamicArray<T>::DynamicArray() : size(0) {
     data = new T[4];
 }
 
@@ -12,7 +12,7 @@ DynamicArray<T>::DynamicArray(int size): size(size) {
 }
 
 template <class T>
-DynamicArray<T>::DynamicArray(T* items, int count): size(count) {
+DynamicArray<T>::DynamicArray(const T* items, int count): size(count) {
     data = new T[size];
 
     for (int i = 0; i < size; i++) {
@@ -30,7 +30,7 @@ DynamicArray<T>::DynamicArray(const DynamicArray<T>& other): size(other.size) {
 }
 
 template <class T>
-T DynamicArray<T>::get(int index) {
+const T& DynamicArray<T>::get(int index) const {
     if (index >= size || index < 0) {
         throw std::out_of_range("Index out of range");
     }
@@ -40,7 +40,7 @@ T DynamicArray<T>::get(int index) {
 // const ссылку возвращать
 
 template <class T>
-int DynamicArray<T>::get_size() {
+int DynamicArray<T>::get_size() const {
     return size;
 }
 

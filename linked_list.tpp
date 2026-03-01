@@ -2,7 +2,11 @@
 #include <stdexcept>
 
 template <class T>
-LinkedList<T>::LinkedList(T* items, int count): length(count), head(nullptr), tail(nullptr) { // Создать список из списка элементов и их количества
+LinkedList<T>::LinkedList(): head(nullptr), tail(nullptr), length(0) { // Создать пустой список
+}
+
+template <class T>
+LinkedList<T>::LinkedList(const T* items, int count): head(nullptr), tail(nullptr), length(count) { // Создать список из списка элементов и их количества
 
     if (length == 0) return;
 
@@ -13,16 +17,10 @@ LinkedList<T>::LinkedList(T* items, int count): length(count), head(nullptr), ta
         tail->next = new Node<T>{items[i], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
         tail = tail->next; // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
     }
-
 }
 
 template <class T>
-LinkedList<T>::LinkedList(): length(0), head(nullptr), tail(nullptr) { // Создать пустой список
-
-}
-
-template <class T>
-LinkedList<T>::LinkedList(const LinkedList<T>& other): length(other.length), head(nullptr), tail(nullptr) {
+LinkedList<T>::LinkedList(const LinkedList<T>& other): head(nullptr), tail(nullptr), length(other.length) {
 
     if (other.head == nullptr) return;
 
@@ -39,17 +37,21 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other): length(other.length), hea
 }
 
 template <class T>
-T LinkedList<T>::get_first() {
+const T& LinkedList<T>::get_first() const {
+    if (head == nullptr) {
+        throw std::out_of_range("Index out of range");
+    }
+
     return head->data;
 }
 
 template <class T>
-T LinkedList<T>::get_last() {
+const T& LinkedList<T>::get_last() const {
     return tail->data;
 }
 
 template <class T>
-T LinkedList<T>::get(int index) {
+const T& LinkedList<T>::get(int index) const {
     if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
 
     Node<T>* current = head;
@@ -62,7 +64,7 @@ T LinkedList<T>::get(int index) {
 }
 
 template <class T>
-int LinkedList<T>::get_length() {
+int LinkedList<T>::get_length() const {
     return length;
 }
 
@@ -160,7 +162,7 @@ void LinkedList<T>::insert_at(T item, int index) {
 }
 
 template <class T>
-LinkedList<T>* LinkedList<T>::concat(LinkedList<T>* other) {
+LinkedList<T>* LinkedList<T>::concat(const LinkedList<T>* other) {
 
     LinkedList<T>* concat_list = new LinkedList<T>();
 
