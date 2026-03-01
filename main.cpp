@@ -10,9 +10,10 @@ int main() {
     ImmutableArraySequence<int> b;
     Sequence<int>* b2 = b.append(1);
     Sequence<int>* b3 = b2->append(2);
-
+    
     delete b2;
     delete b3;
     // std::cout << "Complete!" << std::endl;
     return 0;
 }
+

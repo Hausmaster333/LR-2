@@ -9,12 +9,12 @@ ArraySequence<T>::ArraySequence() : count(0) {
 }
 
 template <class T>
-ArraySequence<T>::ArraySequence(T* items, int count) : count(count) {
+ArraySequence<T>::ArraySequence(const T* items, int count) : count(count) {
     array = new DynamicArray<T>(items, count);
 }
 
 template <class T>
-ArraySequence<T>::ArraySequence(const DynamicArray<T>& other) : count(other.size) {
+ArraySequence<T>::ArraySequence(const DynamicArray<T>& other) : count(other.get_size()) {
     array = new DynamicArray<T>(other);
 }
 
@@ -24,14 +24,14 @@ ArraySequence<T>::ArraySequence(const ArraySequence<T>& other) : count(other.cou
 }
 
 template <class T>
-T ArraySequence<T>::get_first() {
+const T& ArraySequence<T>::get_first() const {
     if (count == 0) throw std::out_of_range("Sequence is empty\n");
 
     return array->get(0);
 }
 
 template <class T>
-T ArraySequence<T>::get_last() {
+const T& ArraySequence<T>::get_last() const {
     if (count == 0) throw std::out_of_range("Sequence is empty\n");
 
     int last_index = get_count() - 1;
@@ -39,14 +39,14 @@ T ArraySequence<T>::get_last() {
 }
 
 template <class T>
-T ArraySequence<T>::get(int index) {
+const T& ArraySequence<T>::get(int index) const {
     if (count == 0) throw std::out_of_range("Sequence is empty\n");
 
     return array->get(index);
 }
 
 template <class T>
-int ArraySequence<T>::get_count() {
+int ArraySequence<T>::get_count() const {
     return count;
 }
 
@@ -56,11 +56,19 @@ Sequence<T>* ArraySequence<T>::get_sub_sequence(int start, int end) {
 
     if (start < 0 || end < 0 || start >= count || end >= count || start > end) throw std::out_of_range("Index out of range\n");
 
-    ArraySequence<T>* sub_array = EmptyClone();
+    int new_count = end - start + 1;
+    T* items = new T[new_count];
 
-    for (int i = start; i < end; i++) {
-        sub_array->append(array->get(i));
+    for (int i = 0; i < new_count; i++) {
+        items[i] = array->get(start + i);
     }
+
+    ArraySequence<T>* sub_array = EmptyClone();
+    delete sub_array->array;
+    sub_array->array = new DynamicArray<T>(items, new_count);
+    sub_array->count = new_count;
+
+    delete[] items;
 
     return sub_array;
 }
@@ -128,20 +136,85 @@ Sequence<T>* ArraySequence<T>::insert_at(T item, int index) {
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::concat(Sequence<T>* other) {
+Sequence<T>* ArraySequence<T>::concat(const Sequence<T>* other) {
     if (other == nullptr) {
         throw std::invalid_argument("Cannot concat with nullptr\n");
     }
 
-    ArraySequence<T>* concat_arr = Instance();
+    int new_count = count + other->get_count();
+    T* items = new T[new_count];
+
+    for (int i = 0; i < count; i++) {
+        items[i] = array->get(i);
+    }
 
     for (int i = 0; i < other->get_count(); i++) {
-        concat_arr->append(other->get(i));
+        items[count + i] = other->get(i);
     }
+
+    ArraySequence<T>* concat_arr = EmptyClone();
+    delete concat_arr->array;
+    concat_arr->array = new DynamicArray<T>(items, new_count);
+    concat_arr->count = new_count;
+
+    delete[] items;
 
     return concat_arr;
 }
 
+template <class T>
+Sequence<T>* ArraySequence<T>::map(T (*func)(const T& elem)) {
+    T* items = new T[count];
+
+    for (int i = 0; i < count; i++) {
+        T mapped_elem = func(get(i));
+        items[i] = mapped_elem;
+    }
+
+    ArraySequence<T>* mapped_arr = EmptyClone();
+    
+    delete mapped_arr->array;
+    mapped_arr->array = new DynamicArray<T>(items, count);
+    mapped_arr->count = count;
+
+    return mapped_arr;
+}
+
+template <class T>
+Sequence<T>* ArraySequence<T>::where(bool (*predicate)(const T& elem)) {
+    T* items = new T[count];
+    int new_count = 0;
+
+    for (int i = 0; i < get_count(); i++) {
+        T current_elem = get(i);
+
+        if (predicate(current_elem)) {
+            items[new_count] = current_elem;
+            new_count++;
+        }
+    }
+
+    ArraySequence<T>* where_arr = EmptyClone();
+
+    delete where_arr->array;
+    where_arr->array = new DynamicArray<T>(items, new_count);
+    where_arr->count = new_count;
+
+    delete[] items;
+
+    return where_arr;
+}
+
+template <class T>
+T ArraySequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) {
+    T reduced_elem = initial_elem;
+
+    for (int i = 0; i < get_count(); i++) {
+        reduced_elem = func(get(i), reduced_elem);
+    }
+
+    return reduced_elem;
+}
 // ==================================================
 
 template <class T>
@@ -150,7 +223,7 @@ ListSequence<T>::ListSequence() {
 }
 
 template <class T>
-ListSequence<T>::ListSequence(T* items, int count) {
+ListSequence<T>::ListSequence(const T* items, int count) {
     list = new LinkedList<T>(items, count);
 }
 
@@ -165,22 +238,22 @@ ListSequence<T>::ListSequence(const ListSequence<T>& other) {
 }
 
 template <class T>
-T ListSequence<T>::get_first() {
+const T& ListSequence<T>::get_first() const {
     return list->get_first();
 }
 
 template <class T>
-T ListSequence<T>::get_last() {
+const T& ListSequence<T>::get_last() const {
     return list->get_last();
 }
 
 template <class T>
-T ListSequence<T>::get(int index) {
+const T& ListSequence<T>::get(int index) const {
     return list->get(index);
 }
 
 template <class T>
-int ListSequence<T>::get_count() {
+int ListSequence<T>::get_count() const {
     return list->get_length();
 }
 
@@ -224,7 +297,7 @@ Sequence<T>* ListSequence<T>::insert_at(T item, int index) {
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::concat(Sequence<T>* other) {
+Sequence<T>* ListSequence<T>::concat(const Sequence<T>* other) {
     if (other == nullptr) {
         throw std::invalid_argument("Cannot concat with nullptr\n");
     }
@@ -238,4 +311,43 @@ Sequence<T>* ListSequence<T>::concat(Sequence<T>* other) {
     return concat_list;
 }
 
+template <class T>
+Sequence<T>* ListSequence<T>::map(T (*func)(const T& elem)) {
+    ListSequence<T>* mapped_list = EmptyClone();
+
+    for (auto current = start(); current != end(); ++current) {
+        T current_elem = *current;
+        T mapped_elem = func(current_elem);
+        mapped_list->append(mapped_elem);
+    }
+
+    return mapped_list;
+}
+
+template <class T>
+Sequence<T>* ListSequence<T>::where(bool (*predicate)(const T& elem)) {
+    ListSequence<T>* where_list = EmptyClone();
+
+    for (auto current = start(); current != end(); ++current) {
+        T current_elem = *current;
+
+        if (predicate(current_elem)) {
+            where_list->append(current_elem);
+        }
+    }
+
+    return where_list;
+}
+
+template <class T>
+T ListSequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) {
+    T reduced_elem = initial_elem;
+
+    for (auto current = start(); current != end(); ++current) {
+        T current_elem = *current;
+        reduced_elem = func(current_elem, reduced_elem);
+    }
+
+    return reduced_elem;
+}
 

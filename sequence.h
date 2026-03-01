@@ -7,17 +7,21 @@
 template <class T>
 class Sequence {
     public:
-        virtual T get_first() const = 0;
-        virtual T get_last() const = 0;
-        virtual T get(int index) const = 0; // Итератор, убрать get в аррей. Сделать интератор + передавать константные ссылки 
-        virtual int get_count() = 0;
+        virtual const T& get_first() const = 0; // const T& ссылка, чтобы не копировать объект, а просто const запрещает менять значение через эту ссылку
+        virtual const T& get_last() const = 0;
+        virtual const T& get(int index) const = 0;
+        virtual int get_count() const = 0;
 
         virtual Sequence<T>* get_sub_sequence(int start, int end) = 0;
 
         virtual Sequence<T>* append(T item) = 0;
         virtual Sequence<T>* prepend(T item) = 0;
         virtual Sequence<T>* insert_at(T item, int index) = 0;
-        virtual Sequence<T>* concat(Sequence<T>* other) = 0;
+        virtual Sequence<T>* concat(const Sequence<T>* other) = 0;
+
+        virtual Sequence<T>* map(T (*func)(const T& elem)) = 0;
+        virtual Sequence<T>* where(bool (*predicate)(const T& elem)) = 0;
+        virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) = 0;
 
         virtual ~Sequence() {}
 };
@@ -29,24 +33,31 @@ class ArraySequence : public Sequence<T> {
         int count;
     public:
         ArraySequence();
-        ArraySequence(const T* items, int count);
+        ArraySequence(const T* items, int count); // const items
         ArraySequence(const DynamicArray<T>& other);
         ArraySequence(const ArraySequence<T>& other);
 
         virtual ArraySequence<T>* Instance() = 0;
         virtual ArraySequence<T>* EmptyClone() = 0;
 
-        T get_first() override;
-        T get_last() override;
-        T get(int index) override;
-        int get_count() override;
+        const T& get_first() const override;
+        const T& get_last() const override;
+        const T& get(int index) const override;
+        int get_count() const override;
 
         Sequence<T>* get_sub_sequence(int start, int end) override;
 
         Sequence<T>* append(T item) override;
         Sequence<T>* prepend(T item) override;
         Sequence<T>* insert_at(T item, int index) override;
-        Sequence<T>* concat(Sequence<T>* other) override;
+        Sequence<T>* concat(const Sequence<T>* other) override;
+
+        Sequence<T>* map(T (*func)(const T& elem)) override;
+        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
+        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
+
+        // typename DynamicArray<T>::Iterator start() const { return array->start(); }
+        // typename DynamicArray<T>::Iterator end() const { return array->end(); }
 
         ~ArraySequence() override {
             delete array;
@@ -59,25 +70,32 @@ class ListSequence : public Sequence<T> {
         LinkedList<T>* list;
     public:
         ListSequence();
-        ListSequence(T* items, int count);
+        ListSequence(const T* items, int count);
         ListSequence(const LinkedList<T>& other);
         ListSequence(const ListSequence<T>& other);
 
-        virtual ArraySequence<T>* Instance() = 0;
+        virtual ListSequence<T>* Instance() = 0;
         virtual ListSequence<T>* EmptyClone() = 0;
 
-        T get_first() override;
-        T get_last() override;
-        T get(int index) override;
-        int get_count() override;
+        const T& get_first() const override;
+        const T& get_last() const override;
+        const T& get(int index) const override;
+        int get_count() const override;
 
         Sequence<T>* get_sub_sequence(int start, int end) override;
 
         Sequence<T>* append(T item) override;
         Sequence<T>* prepend(T item) override;
         Sequence<T>* insert_at(T item, int index) override;
-        Sequence<T>* concat(Sequence<T>* other) override;
-    
+        Sequence<T>* concat(const Sequence<T>* other) override;
+
+        Sequence<T>* map(T (*func)(const T& elem)) override;
+        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
+        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
+
+        typename LinkedList<T>::Iterator start() const { return list->start(); }
+        typename LinkedList<T>::Iterator end() const { return list->end(); }
+
         ~ListSequence() override {
             delete list;
         }
@@ -96,7 +114,7 @@ class MutableArraySequence : public ArraySequence<T> {
 
     public:
         MutableArraySequence() : ArraySequence<T>() {};
-        MutableArraySequence(T* items, int count) : ArraySequence<T>(items, count) {};
+        MutableArraySequence(const T* items, int count) : ArraySequence<T>(items, count) {};
         MutableArraySequence(const DynamicArray<T>& other) : ArraySequence<T>(other) {};
         MutableArraySequence(const ArraySequence<T>& other) : ArraySequence<T>(other) {};
 };
@@ -114,7 +132,7 @@ class ImmutableArraySequence : public ArraySequence<T> {
 
     public:
         ImmutableArraySequence() : ArraySequence<T>() {};
-        ImmutableArraySequence(T* items, int count) : ArraySequence<T>(items, count) {};
+        ImmutableArraySequence(const T* items, int count) : ArraySequence<T>(items, count) {};
         ImmutableArraySequence(const DynamicArray<T>& other) : ArraySequence<T>(other) {};
         ImmutableArraySequence(const ArraySequence<T>& other) : ArraySequence<T>(other) {};
 };
@@ -132,7 +150,7 @@ class MutableListSequence : public ListSequence<T> {
 
     public:
         MutableListSequence() : ListSequence<T>() {};
-        MutableListSequence(T* items, int count) : ListSequence<T>(items, count) {};
+        MutableListSequence(const T* items, int count) : ListSequence<T>(items, count) {};
         MutableListSequence(const LinkedList<T>& other) : ListSequence<T>(other) {};
         MutableListSequence(const ListSequence<T>& other) : ListSequence<T>(other) {};
 };
@@ -150,7 +168,7 @@ class ImmutableListSequence : public ListSequence<T> {
         
     public:
         ImmutableListSequence() : ListSequence<T>() {};
-        ImmutableListSequence(T* items, int count) : ListSequence<T>(items, count) {};
+        ImmutableListSequence(const T* items, int count) : ListSequence<T>(items, count) {};
         ImmutableListSequence(const LinkedList<T>& other) : ListSequence<T>(other) {};
         ImmutableListSequence(const ListSequence<T>& other) : ListSequence<T>(other) {};
 };

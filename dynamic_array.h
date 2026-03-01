@@ -10,18 +10,40 @@ class DynamicArray {
     public:
         DynamicArray();
         DynamicArray(int size);
-        DynamicArray(T* items, int count);
+        DynamicArray(const T* items, int count);
         DynamicArray(const DynamicArray<T>& other);
 
-        T get(int index);
+        const T& get(int index) const;
 
-        int get_size();
+        int get_size() const;
 
         void set(int index, T value);
 
         void resize(int newSize);
 
         ~DynamicArray();
+
+        // class Iterator {
+        //     private:
+        //         T* current;
+        //     public:
+        //         Iterator(T* ptr) : current(ptr) {}
+
+        //         const T& operator*() const { return *current; }
+
+        //         Iterator& operator++() {
+        //             current++;
+        //             return *this;
+        //         }
+
+        //         bool operator!=(const Iterator& other) const {
+        //             return current != other.current;
+        //         }
+        // };
+
+        // Iterator start() const { return Iterator(data); }
+        // Iterator end() const { return Iterator(data + size); }
+            
 };
 
 #include "dynamic_array.tpp"
