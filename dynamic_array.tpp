@@ -30,6 +30,21 @@ DynamicArray<T>::DynamicArray(const DynamicArray<T>& other): size(other.size) {
 }
 
 template <class T>
+DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& other) {
+    if (this == &other) return *this; // Чтобы не самоприсваивать
+
+    delete[] data;
+    size = other.size;
+    data = new T[size];
+
+    for (int i = 0; i < size; i++) {
+        data[i] = other.data[i];
+    }
+
+    return *this;
+}
+
+template <class T>
 const T& DynamicArray<T>::get(int index) const {
     if (index >= size || index < 0) {
         throw std::out_of_range("Index out of range");

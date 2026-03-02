@@ -199,6 +199,8 @@ TEST(MutableArraySequenceTest, Concat) {
     EXPECT_EQ(concat_arr->get_first(), 0);
     EXPECT_EQ(concat_arr->get_last(), -9);
     EXPECT_EQ(concat_arr->get(6), -7);
+
+    delete concat_arr;
 }
 
 TEST(MutableArraySequenceTest, Map) {
@@ -310,6 +312,8 @@ TEST(ImmutableArraySequenceTest, Concat) {
     EXPECT_EQ(concat_arr->get_first(), 0);
     EXPECT_EQ(concat_arr->get_last(), -9);
     EXPECT_EQ(concat_arr->get(6), -7);
+
+    delete concat_arr;
 }
 
 TEST(ImmutableArraySequenceTest, Map) {
@@ -346,6 +350,361 @@ TEST(ImmutableArraySequenceTest, Reduce) {
 }
 
 // =======================
+
+TEST(MutableListSequenceTest, Constructors) { // Тестируем на Mutable варианте
+    MutableListSequence<int> empty_list; // ListSequence()
+    EXPECT_EQ(empty_list.get_count(), 0);
+    
+    int items[] = {1, 2, 3, 4};
+    MutableListSequence<int> list(items, 4); // ListSequence(const T* items, int count)
+    EXPECT_EQ(list.get_count(), 4);
+    EXPECT_EQ(list.get_first(), 1);
+    EXPECT_EQ(list.get_last(), 4);
+    EXPECT_EQ(list.get(2), 3);
+
+    LinkedList<int> link_list(items, 4);
+    MutableListSequence<int> list_from_link_list(link_list); // ListSequence(const LinkedList<T>& other)
+    EXPECT_EQ(list_from_link_list.get_count(), 4);
+    EXPECT_EQ(list_from_link_list.get_first(), 1);
+    EXPECT_EQ(list_from_link_list.get_last(), 4);
+    EXPECT_EQ(list_from_link_list.get(2), 3);
+    
+    MutableListSequence<int> list_from_other(list_from_link_list); // ListSequence(const ArraySequence<T>& other)
+    EXPECT_EQ(list_from_other.get_count(), 4);
+    EXPECT_EQ(list_from_other.get_first(), 1);
+    EXPECT_EQ(list_from_other.get_last(), 4);
+    EXPECT_EQ(list_from_other.get(2), 3);
+}
+
+TEST(MutableListSequenceTest, GetAndSet) {
+    MutableListSequence<int> list;
+    list.append(5); // append()
+    list.append(10);
+    list.prepend(6); // prepend()
+    list.prepend(-10);
+    list.insert_at(0, 3); // insert_at()
+
+    EXPECT_EQ(list.get_count(), 5); // get_count()
+    EXPECT_EQ(list.get_first(), -10); // get_first()
+    EXPECT_EQ(list.get_last(), 10); // get_last()
+    EXPECT_EQ(list.get(3), 0); // get()
+}
+
+TEST(MutableListSequenceTest, GetSubSequence) {
+    int items[] = {1, 2, 3, 4, 5, 6, 7};
+    MutableListSequence<int> list(items, 7);
+
+    Sequence<int>* sub_list = list.get_sub_sequence(2, 5); // get_sub_sequence
+    EXPECT_EQ(sub_list->get_count(), 4);
+    EXPECT_EQ(sub_list->get_first(), 3);
+    EXPECT_EQ(sub_list->get_last(), 6);
+    EXPECT_EQ(sub_list->get(2), 5);
+
+    delete sub_list;
+}
+
+TEST(MutableListSequenceTest, Concat) {
+    int pos_items[] = {0, 2, 3, 4, 5};
+    int neg_items[] = {-6, -7, -8, -9};
+
+    MutableListSequence<int> first_list(pos_items, 5);
+    MutableListSequence<int> second_list(neg_items, 4);
+
+    Sequence<int>* concat_list = first_list.concat(&second_list); // concat
+    EXPECT_EQ(concat_list->get_count(), 9);
+    EXPECT_EQ(concat_list->get_first(), 0);
+    EXPECT_EQ(concat_list->get_last(), -9);
+    EXPECT_EQ(concat_list->get(6), -7);
+
+    delete concat_list;
+}
+
+TEST(MutableListSequenceTest, Map) {
+    int items[] = {1, -10, 3, 4, -5};
+    MutableListSequence<int> list(items, 5);
+
+    Sequence<int>* mapped_list = list.map(square);
+    EXPECT_EQ(mapped_list->get_first(), 1);
+    EXPECT_EQ(mapped_list->get(1), 100);
+    EXPECT_EQ(mapped_list->get(2), 9);
+    EXPECT_EQ(mapped_list->get_last(), 25);
+
+    delete mapped_list;
+}
+
+TEST(MutableListSequenceTest, Where) {
+    int items[] = {1, -10, 3, 4, -5};
+    MutableListSequence<int> list(items, 5);
+
+    Sequence<int>* where_list = list.where(is_positive);
+    EXPECT_EQ(where_list->get_first(), 1);
+    EXPECT_EQ(where_list->get(1), 3);
+    EXPECT_EQ(where_list->get_last(), 4);
+
+    delete where_list;
+}
+
+TEST(MutableListSequenceTest, Reduce) {
+    int items[] = {1, 2, 3, 4, 5};
+    MutableListSequence<int> list(items, 5);
+
+    int reduced = list.reduce(sum, 0);
+    EXPECT_EQ(reduced, 15);
+}
+
+// =======================
+
+TEST(ImmutableListSequenceTest, Constructors) { // Тестируем на Immutable варианте
+    ImmutableListSequence<int> empty_list; // ListSequence();
+    EXPECT_EQ(empty_list.get_count(), 0);
+    
+    int items[] = {1, 2, 3, 4};
+    ImmutableListSequence<int> list(items, 4); // ListSequence(const T* items, int count)
+    EXPECT_EQ(list.get_count(), 4);
+    EXPECT_EQ(list.get_first(), 1);
+    EXPECT_EQ(list.get_last(), 4);
+    EXPECT_EQ(list.get(2), 3);
+
+    LinkedList<int> link_list(items, 4);
+    ImmutableListSequence<int> list_from_link_list(link_list); // ListSequence(const LinkedList<T>& other)
+    EXPECT_EQ(list_from_link_list.get_count(), 4);
+    EXPECT_EQ(list_from_link_list.get_first(), 1);
+    EXPECT_EQ(list_from_link_list.get_last(), 4);
+    EXPECT_EQ(list_from_link_list.get(2), 3);
+    
+    ImmutableListSequence<int> list_from_other(list); // ListSequence(const ListSequence<T>& other)
+    EXPECT_EQ(list_from_other.get_count(), 4);
+    EXPECT_EQ(list_from_other.get_first(), 1);
+    EXPECT_EQ(list_from_other.get_last(), 4);
+    EXPECT_EQ(list_from_other.get(2), 3);
+}
+
+TEST(ImmutableListSequenceTest, GetAndSet) {
+    int items[] = {1, 2, 3};
+    ImmutableListSequence<int> list_1(items, 3);
+
+    Sequence<int>* list_2 = list_1.append(4); // append()
+    EXPECT_EQ(list_1.get_count(), 3); // Размер arr не меняется
+    EXPECT_EQ(list_2->get_count(), 4); // Добавляется в копию
+    EXPECT_EQ(list_2->get_last(), 4);
+
+    Sequence<int>* list_3 = list_1.prepend(10); // prepend()
+    EXPECT_EQ(list_1.get_count(), 3);
+    EXPECT_EQ(list_3->get_count(), 4);
+    EXPECT_EQ(list_3->get_first(), 10);
+    
+    Sequence<int>* list_4 = list_1.insert_at(0, 3);
+    EXPECT_EQ(list_1.get_count(), 3);
+    EXPECT_EQ(list_4->get_count(), 4);
+    EXPECT_EQ(list_4->get(3), 0);
+    
+    delete list_2;
+    delete list_3;
+    delete list_4;
+}
+
+TEST(ImmutableListSequenceTest, GetSubSequence) {
+    int items[] = {1, 2, 3, 4, 5, 6, 7};
+    ImmutableListSequence<int> list(items, 7);
+
+    Sequence<int>* sub_list = list.get_sub_sequence(2, 5); // get_sub_sequence
+    EXPECT_EQ(sub_list->get_count(), 4);
+    EXPECT_EQ(sub_list->get_first(), 3);
+    EXPECT_EQ(sub_list->get_last(), 6);
+    EXPECT_EQ(sub_list->get(2), 5);
+
+    delete sub_list;
+}
+
+TEST(ImmutableListSequenceTest, Concat) {
+    int pos_items[] = {0, 2, 3, 4, 5};
+    int neg_items[] = {-6, -7, -8, -9};
+
+    ImmutableListSequence<int> first_list(pos_items, 5);
+    ImmutableListSequence<int> second_list(neg_items, 4);
+
+    Sequence<int>* concat_list = first_list.concat(&second_list); // concat
+    EXPECT_EQ(concat_list->get_count(), 9);
+    EXPECT_EQ(concat_list->get_first(), 0);
+    EXPECT_EQ(concat_list->get_last(), -9);
+    EXPECT_EQ(concat_list->get(6), -7);
+
+    delete concat_list;
+}
+
+TEST(ImmutableListSequenceTest, Map) {
+    int items[] = {1, -10, 3, 4, -5};
+    ImmutableListSequence<int> list(items, 5);
+
+    Sequence<int>* mapped_list = list.map(square);
+    EXPECT_EQ(mapped_list->get_first(), 1);
+    EXPECT_EQ(mapped_list->get(1), 100);
+    EXPECT_EQ(mapped_list->get(2), 9);
+    EXPECT_EQ(mapped_list->get_last(), 25);
+
+    delete mapped_list;
+}
+
+TEST(ImmutableListSequenceTest, Where) {
+    int items[] = {1, -10, 3, 4, -5};
+    ImmutableListSequence<int> list(items, 5);
+
+    Sequence<int>* where_list = list.where(is_positive);
+    EXPECT_EQ(where_list->get_first(), 1);
+    EXPECT_EQ(where_list->get(1), 3);
+    EXPECT_EQ(where_list->get_last(), 4);
+
+    delete where_list;
+}
+
+TEST(ImmutableListSequenceTest, Reduce) {
+    int items[] = {1, 2, 3, 4, 5};
+    ImmutableListSequence<int> list(items, 5);
+
+    int reduced = list.reduce(sum, 0);
+    EXPECT_EQ(reduced, 15);
+}
+
+// =======================
+
+TEST(BitTest, Operations) {
+    Bit a(1), b(0), c(42);
+    EXPECT_EQ(c.get(), true);
+    EXPECT_EQ((a & b).get(), false);
+    EXPECT_EQ((a | b).get(), true);
+    EXPECT_EQ((a ^ b).get(), true);
+    EXPECT_EQ((~a).get(), false);
+    EXPECT_EQ((~b).get(), true);
+}
+
+TEST(BitSequenceTest, BitAnd) {
+    BitSequence first(new MutableArraySequence<Bit>());
+    BitSequence second(new MutableListSequence<Bit>());
+
+    first.append(Bit(1));
+    first.append(Bit(0));
+    first.append(Bit(1));
+
+    second.append(Bit(1));
+    second.append(Bit(1));
+    second.append(Bit(0));
+
+    BitSequence* seq_and = first.bit_and(second);
+    EXPECT_EQ(seq_and->get(0), Bit(1));
+    EXPECT_EQ(seq_and->get(1), Bit(0));
+    EXPECT_EQ(seq_and->get(2), Bit(0));
+
+    delete seq_and;
+}
+
+TEST(BitSequenceTest, BitOr) {
+    BitSequence first(new MutableArraySequence<Bit>());
+    BitSequence second(new MutableListSequence<Bit>());
+
+    first.append(Bit(1));
+    first.append(Bit(0));
+    first.append(Bit(0));
+
+    second.append(Bit(1));
+    second.append(Bit(1));
+    second.append(Bit(0));
+
+    BitSequence* seq_or = first.bit_or(second);
+    EXPECT_EQ(seq_or->get(0), Bit(1));
+    EXPECT_EQ(seq_or->get(1), Bit(1));
+    EXPECT_EQ(seq_or->get(2), Bit(0));
+
+    delete seq_or;
+}
+
+TEST(BitSequenceTest, BitXOR) {
+    BitSequence first(new MutableArraySequence<Bit>());
+    BitSequence second(new MutableListSequence<Bit>());
+
+    first.append(Bit(1));
+    first.append(Bit(0));
+    first.append(Bit(0));
+
+    second.append(Bit(1));
+    second.append(Bit(1));
+    second.append(Bit(0));
+
+    BitSequence* seq_xor = first.bit_xor(second);
+    EXPECT_EQ(seq_xor->get(0), Bit(0));
+    EXPECT_EQ(seq_xor->get(1), Bit(1));
+    EXPECT_EQ(seq_xor->get(2), Bit(0));
+
+    delete seq_xor;
+}
+
+TEST(BitSequenceTest, BitNot) {
+    BitSequence first(new MutableArraySequence<Bit>());
+
+    first.append(Bit(1));
+    first.append(Bit(0));
+    first.append(Bit(0));
+
+    BitSequence* seq_not = first.bit_not();
+    EXPECT_EQ(seq_not->get(0), Bit(0));
+    EXPECT_EQ(seq_not->get(1), Bit(1));
+    EXPECT_EQ(seq_not->get(2), Bit(1));
+
+    delete seq_not;
+}
+
+// =======================
+
+TEST(OptionTest, Some) {
+    Option<int> opt = Option<int>::Some(42);
+    EXPECT_TRUE(opt.has_value());
+    EXPECT_EQ(opt.get_value(), 42);
+}
+
+TEST(OptionTest, None) {
+    Option<int> opt = Option<int>::None();
+    EXPECT_FALSE(opt.has_value());
+    EXPECT_THROW(opt.get_value(), std::runtime_error);
+}
+
+TEST(OptionTest, TryGetArraySequence) {
+    MutableArraySequence<int> seq;
+
+    EXPECT_FALSE(seq.try_get_first().has_value());
+    EXPECT_FALSE(seq.try_get_last().has_value());
+    EXPECT_FALSE(seq.try_get(0).has_value());
+
+    seq.append(10);
+    seq.append(20);
+
+    Option<int> first = seq.try_get_first();
+    EXPECT_TRUE(first.has_value());
+    EXPECT_EQ(first.get_value(), 10);
+
+    Option<int> last = seq.try_get_last();
+    EXPECT_TRUE(last.has_value());
+    EXPECT_EQ(last.get_value(), 20);
+
+    Option<int> elem = seq.try_get(1);
+    EXPECT_TRUE(elem.has_value());
+    EXPECT_EQ(elem.get_value(), 20);
+
+    EXPECT_FALSE(seq.try_get(-1).has_value());
+    EXPECT_FALSE(seq.try_get(5).has_value());
+}
+
+TEST(OptionTest, TryGetListSequence) {
+    MutableArraySequence<int> seq;
+
+    EXPECT_FALSE(seq.try_get_first().has_value());
+    EXPECT_FALSE(seq.try_get_last().has_value());
+
+    seq.append(10);
+    seq.append(20);
+
+    EXPECT_TRUE(seq.try_get_first().has_value());
+    EXPECT_EQ(seq.try_get_first().get_value(), 10);
+    EXPECT_EQ(seq.try_get(1).get_value(), 20);
+}
 
 // =======================
 

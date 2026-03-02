@@ -6,12 +6,14 @@ class DynamicArray {
     private:
         T* data;
         int size;
-
+    // массив массивов и список массивов
     public:
         DynamicArray();
         DynamicArray(int size);
         DynamicArray(const T* items, int count);
         DynamicArray(const DynamicArray<T>& other);
+
+        DynamicArray<T>& operator=(const DynamicArray<T>& other);
 
         const T& get(int index) const;
 

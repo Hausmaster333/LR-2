@@ -3,6 +3,7 @@
 
 #include "dynamic_array.h"
 #include "linked_list.h"
+#include "option.h"
 
 template <class T>
 class Sequence {
@@ -10,6 +11,11 @@ class Sequence {
         virtual const T& get_first() const = 0; // const T& ссылка, чтобы не копировать объект, а просто const запрещает менять значение через эту ссылку
         virtual const T& get_last() const = 0;
         virtual const T& get(int index) const = 0;
+
+        virtual Option<T> try_get_first() const = 0;
+        virtual Option<T> try_get_last() const = 0;
+        virtual Option<T> try_get(int index) const = 0;
+
         virtual int get_count() const = 0;
 
         virtual Sequence<T>* get_sub_sequence(int start, int end) = 0;
@@ -43,6 +49,11 @@ class ArraySequence : public Sequence<T> {
         const T& get_first() const override;
         const T& get_last() const override;
         const T& get(int index) const override;
+
+        Option<T> try_get_first() const override;
+        Option<T> try_get_last() const override;
+        Option<T> try_get(int index) const override;
+
         int get_count() const override;
 
         Sequence<T>* get_sub_sequence(int start, int end) override;
@@ -80,6 +91,11 @@ class ListSequence : public Sequence<T> {
         const T& get_first() const override;
         const T& get_last() const override;
         const T& get(int index) const override;
+
+        Option<T> try_get_first() const override;
+        Option<T> try_get_last() const override;
+        Option<T> try_get(int index) const override;
+
         int get_count() const override;
 
         Sequence<T>* get_sub_sequence(int start, int end) override;
@@ -171,6 +187,45 @@ class ImmutableListSequence : public ListSequence<T> {
         ImmutableListSequence(const T* items, int count) : ListSequence<T>(items, count) {};
         ImmutableListSequence(const LinkedList<T>& other) : ListSequence<T>(other) {};
         ImmutableListSequence(const ListSequence<T>& other) : ListSequence<T>(other) {};
+};
+
+class Bit {
+    private:
+        bool value;
+    public:
+        Bit() : value(false) {}
+        Bit(bool val) : value(val) {}
+        Bit(int val) : value(val != 0) {}
+
+        bool get() const { return value; }
+
+        Bit operator&(const Bit& other) const { return Bit(value && other.value); } // Логическое И
+        Bit operator|(const Bit& other) const { return Bit(value || other.value); } // Логическое ИЛИ
+        Bit operator^(const Bit& other) const { return Bit(value != other.value); } // Логическое XOR
+        Bit operator~() const { return Bit(!value); } // Логическое НЕ
+
+        bool operator==(const Bit& other) const { return value == other.value; }
+        bool operator!=(const Bit& other) const { return value != other.value; }
+};
+
+class BitSequence {
+    private:
+        Sequence<Bit>* seq;
+    public:
+        BitSequence(Sequence<Bit>* sequence) : seq(sequence) {} // Передаем new Mutable[Immutable]Array[List]Sequence<Bit>()
+
+        void append(const Bit& item) { seq->append(item); }
+        const Bit& get(int index) const { return seq->get(index); }
+        int get_count() const { return seq->get_count(); }
+
+        BitSequence* bit_and(const BitSequence& other) const; // И
+        BitSequence* bit_or(const BitSequence& other) const; // ИЛИ
+        BitSequence* bit_xor(const BitSequence& other) const; // XOR
+        BitSequence* bit_not() const; // НЕ
+
+        ~BitSequence() {
+            delete seq;
+        }
 };
 
 #include "sequence.tpp"

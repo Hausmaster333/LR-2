@@ -37,6 +37,29 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other): head(nullptr), tail(nullp
 }
 
 template <class T>
+LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
+    if (this == &other) return *this; // Чтобы не самоприсваивать
+
+    Node<T>* current = head;
+    while (current != nullptr) {
+        Node<T>* tmp = current;
+        current = current->next;
+        delete tmp;
+    }
+
+    head = nullptr;
+    tail = nullptr;
+    length = 0;
+
+    for (auto curr = other.start(); curr != other.end(); curr++) {
+        T curr_elem = *curr;
+        append(curr_elem);
+    }
+
+    return *this;
+}
+
+template <class T>
 const T& LinkedList<T>::get_first() const {
     if (head == nullptr) {
         throw std::out_of_range("Index out of range");
