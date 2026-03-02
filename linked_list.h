@@ -19,6 +19,8 @@ class LinkedList {
         LinkedList(const T* items, int count);
         LinkedList(const LinkedList<T>& other);
 
+        LinkedList<T>& operator=(const LinkedList<T>& other);
+
         const T& get_first() const;
         const T& get_last() const;
         const T& get(int index) const; // Лучше использовать Iterator
