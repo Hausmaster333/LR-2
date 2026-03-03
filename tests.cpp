@@ -708,6 +708,125 @@ TEST(OptionTest, TryGetListSequence) {
 
 // =======================
 
+TEST(ArrayOfArraysTest, CopyConstructor) {
+    DynamicArray<int> row(2);
+    row.set(0, 5); row.set(1, 6);
+
+    DynamicArray<DynamicArray<int>> original(1);
+    original.set(0, row);
+
+    DynamicArray<DynamicArray<int>> copy(original);
+    EXPECT_EQ(copy.get(0).get(0), 5);
+    EXPECT_EQ(copy.get(0).get(1), 6);
+}
+
+TEST(ArrayOfArraysTest, CreateAndAccess) {
+    DynamicArray<int> row_1(3);
+    row_1.set(0, 1); 
+    row_1.set(1, 2); 
+    row_1.set(2, 3);
+
+    DynamicArray<int> row_2(2);
+    row_2.set(0, 10); 
+    row_2.set(1, 20);
+
+    DynamicArray<DynamicArray<int>> matrix(2);
+    matrix.set(0, row_1);
+    matrix.set(1, row_2);
+
+    EXPECT_EQ(matrix.get(0).get(0), 1);
+    EXPECT_EQ(matrix.get(0).get(2), 3);
+    EXPECT_EQ(matrix.get(1).get(0), 10);
+    EXPECT_EQ(matrix.get(1).get(1), 20);
+    EXPECT_EQ(matrix.get_size(), 2);
+}
+
+TEST(ArrayOfArraysTest, IndependentCopy) {
+    DynamicArray<int> row(2);
+    row.set(0, 1); row.set(1, 2);
+
+    DynamicArray<DynamicArray<int>> original(1);
+    original.set(0, row);
+
+    DynamicArray<DynamicArray<int>> copy(original);
+
+    DynamicArray<int> newRow(2); // меняем оригинал
+    newRow.set(0, 99); newRow.set(1, 100);
+    original.set(0, newRow);
+    
+    EXPECT_EQ(copy.get(0).get(0), 1); // копия не изменилась
+    EXPECT_EQ(copy.get(0).get(1), 2);
+}
+
+TEST(ListOfArraysTest, CopyConstructor) {
+    LinkedList<DynamicArray<int>> original;
+
+    DynamicArray<int> row(2);
+    row.set(0, 7); row.set(1, 8);
+    original.append(row);
+
+    LinkedList<DynamicArray<int>> copy(original);
+    EXPECT_EQ(copy.get(0).get(0), 7);
+    EXPECT_EQ(copy.get(0).get(1), 8);
+}
+
+TEST(ListOfArraysTest, AppendAndAccess) {
+    LinkedList<DynamicArray<int>> list;
+
+    DynamicArray<int> row_1(3);
+    row_1.set(0, 1);
+    row_1.set(1, 2);
+    row_1.set(2, 3);
+
+    DynamicArray<int> row_2(2);
+    row_2.set(0, 10); 
+    row_2.set(1, 20);
+
+    list.append(row_1);
+    list.append(row_2);
+
+    EXPECT_EQ(list.get_length(), 2);
+    EXPECT_EQ(list.get(0).get(0), 1);
+    EXPECT_EQ(list.get(0).get(2), 3);
+    EXPECT_EQ(list.get(1).get(0), 10);
+}
+
+TEST(ListOfArraysTest, PrependAndAccess) {
+    LinkedList<DynamicArray<int>> list;
+
+    DynamicArray<int> row_1(2);
+    row_1.set(0, 1); 
+    row_1.set(1, 2);
+
+    DynamicArray<int> row_2(2);
+    row_2.set(0, 3); 
+    row_2.set(1, 4);
+
+    list.append(row_1);
+    list.prepend(row_2);
+
+    EXPECT_EQ(list.get_first().get(0), 3);
+    EXPECT_EQ(list.get_last().get(0), 1);
+}
+
+TEST(ListOfArraysTest, IndependentCopy) {
+    LinkedList<DynamicArray<int>> original;
+
+    DynamicArray<int> row(2);
+    row.set(0, 1); row.set(1, 2);
+    original.append(row);
+
+    LinkedList<DynamicArray<int>> copy(original);
+
+    DynamicArray<int> new_row(2); // меняем оригинал
+    new_row.set(0, 99); new_row.set(1, 100);
+
+    EXPECT_EQ(copy.get(0).get(0), 1); // копия не изменилась
+}
+
+// =======================
+
+
 TEST(SequencePolymorhTest, ArrayAndList) {
     Sequence<int>* arr = new MutableArraySequence<int>();
     Sequence<int>* list = new MutableListSequence<int>();

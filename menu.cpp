@@ -41,8 +41,6 @@ void print_bit_sequence(BitSequence* seq) {
     std::cout << "]" << std::endl;
 }
 
-// === Выбор последовательности по индексу ===
-
 int select_sequence(const char* prompt) {
     if (seq_count == 0) {
         std::cout << "No sequences created" << std::endl;
@@ -82,8 +80,6 @@ int select_bit_sequence(const char* prompt) {
     }
     return idx;
 }
-
-// === 1. Создание последовательности ===
 
 void menu_create_sequence() {
     std::cout << "\n=== Create Sequence ===" << std::endl;
@@ -128,10 +124,18 @@ void menu_create_sequence() {
 
     Sequence<int>* seq = nullptr;
     switch (choice) {
-        case 1: seq = new MutableArraySequence<int>(); break;
-        case 2: seq = new MutableListSequence<int>(); break;
-        case 3: seq = new ImmutableArraySequence<int>(); break;
-        case 4: seq = new ImmutableListSequence<int>(); break;
+        case 1: 
+            seq = new MutableArraySequence<int>(); 
+            break;
+        case 2: 
+            seq = new MutableListSequence<int>(); 
+            break;
+        case 3: 
+            seq = new ImmutableArraySequence<int>(); 
+            break;
+        case 4: 
+            seq = new ImmutableListSequence<int>(); 
+            break;
         default:
             std::cout << "Invalid choice" << std::endl;
             return;
@@ -142,7 +146,7 @@ void menu_create_sequence() {
         int val;
         std::cin >> val;
         Sequence<int>* result = seq->append(val);
-        if (result != seq) { // Immutable — заменяем указатель
+        if (result != seq) { // Если Immutable заменяем указатель
             delete seq;
             seq = result;
         }
@@ -151,8 +155,6 @@ void menu_create_sequence() {
     sequences[seq_count++] = seq;
     std::cout << "Sequence created (index: " << seq_count - 1 << ")" << std::endl;
 }
-
-// === 2. Добавление элемента ===
 
 void menu_add_element() {
     int idx = select_sequence("Select sequence:");
@@ -169,8 +171,6 @@ void menu_add_element() {
     }
     std::cout << "Element added" << std::endl;
 }
-
-// === 3. Печать последовательности ===
 
 void menu_print_sequence() {
     if (seq_count == 0 && bit_seq_count == 0) {
@@ -189,8 +189,6 @@ void menu_print_sequence() {
     }
 }
 
-// === 4. Получение элемента ===
-
 void menu_get_element() {
     int idx = select_sequence("Select sequence:");
     if (idx == -1) return;
@@ -205,8 +203,6 @@ void menu_get_element() {
         std::cout << "Error: " << e.what() << std::endl;
     }
 }
-
-// === 5. Получение подпоследовательности ===
 
 void menu_get_subsequence() {
     int idx = select_sequence("Select sequence:");
@@ -236,8 +232,6 @@ void menu_get_subsequence() {
     }
 }
 
-// === 6. Конкатенация ===
-
 void menu_concat_sequences() {
     int idx1 = select_sequence("Select first sequence:");
     if (idx1 == -1) return;
@@ -256,8 +250,6 @@ void menu_concat_sequences() {
         std::cout << "No space to save, result deleted" << std::endl;
     }
 }
-
-// === 7. Map (square) ===
 
 void menu_map() {
     int idx = select_sequence("Select sequence:");
@@ -278,8 +270,6 @@ void menu_map() {
     }
 }
 
-// === 8. Where (positive) ===
-
 void menu_where() {
     int idx = select_sequence("Select sequence:");
     if (idx == -1) return;
@@ -299,8 +289,6 @@ void menu_where() {
     }
 }
 
-// === 9. Reduce (sum) ===
-
 void menu_reduce() {
     int idx = select_sequence("Select sequence:");
     if (idx == -1) return;
@@ -313,8 +301,6 @@ void menu_reduce() {
     int result = sequences[idx]->reduce(sum, 0);
     std::cout << "Result reduce(sum): " << result << std::endl;
 }
-
-// === 10. BitSequence операции ===
 
 void menu_bit_operations() {
     std::cout << "\n=== BitSequence Operations ===" << std::endl;
@@ -372,8 +358,6 @@ void menu_bit_operations() {
     }
 }
 
-// === 11. Запуск тестов ===
-
 void menu_run_tests() {
     std::cout << "\nRunning tests..." << std::endl;
     int ret = system("make tests && ./tests");
@@ -381,8 +365,6 @@ void menu_run_tests() {
         std::cout << "Error running tests" << std::endl;
     }
 }
-
-// === Главное меню ===
 
 void run_menu() {
     int choice = -1;
@@ -404,26 +386,52 @@ void run_menu() {
         std::cin >> choice;
 
         switch (choice) {
-            case 1: menu_create_sequence(); break;
-            case 2: menu_add_element(); break;
-            case 3: menu_print_sequence(); break;
-            case 4: menu_get_element(); break;
-            case 5: menu_get_subsequence(); break;
-            case 6: menu_concat_sequences(); break;
-            case 7: menu_map(); break;
-            case 8: menu_where(); break;
-            case 9: menu_reduce(); break;
-            case 10: menu_bit_operations(); break;
-            case 11: menu_run_tests(); break;
-            case 0: std::cout << "Exit" << std::endl; break;
-            default: std::cout << "Invalid choice" << std::endl; break;
+            case 1: 
+                menu_create_sequence(); 
+                break;
+            case 2: 
+                menu_add_element(); 
+                break;
+            case 3: 
+                menu_print_sequence(); 
+                break;
+            case 4: 
+                menu_get_element(); 
+                break;
+            case 5: 
+                menu_get_subsequence(); 
+                break;
+            case 6: 
+                menu_concat_sequences(); 
+                break;
+            case 7: 
+                menu_map(); 
+                break;
+            case 8: 
+                menu_where(); 
+                break;
+            case 9: 
+                menu_reduce(); 
+                break;
+            case 10: 
+                menu_bit_operations(); 
+                break;
+            case 11: 
+                menu_run_tests(); 
+                break;
+            case 0: 
+                std::cout << "Exit" << std::endl; 
+                break;
+            default: 
+                std::cout << "Invalid choice" << std::endl; 
+                break;
         }
     }
 
-    // Очистка памяти
     for (int i = 0; i < seq_count; i++) {
         delete sequences[i];
     }
+
     for (int i = 0; i < bit_seq_count; i++) {
         delete bit_sequences[i];
     }
