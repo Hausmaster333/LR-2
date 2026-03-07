@@ -2,18 +2,16 @@
 #define LINKED_LIST_H
 
 template <class T>
-struct Node {
-    T data;
-    Node* next;
-};
-
-template <class T>
 class LinkedList {
     private:
-        Node<T>* head;
-        Node<T>* tail;
+        struct Node {
+            T data;
+            Node* next;
+        };
+
+        Node* head;
+        Node* tail;
         int length;
-    
     public:
         LinkedList();
         LinkedList(const T* items, int count);
@@ -38,9 +36,9 @@ class LinkedList {
 
         class Iterator {
             private:
-                Node<T>* current;
+                Node* current;
             public:
-                Iterator(Node<T>* node) : current(node) {}
+                Iterator(Node* node) : current(node) {}
 
                 const T& operator*() const { return current->data; }
 

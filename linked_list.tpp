@@ -10,11 +10,11 @@ LinkedList<T>::LinkedList(const T* items, int count): head(nullptr), tail(nullpt
 
     if (length == 0) return;
 
-    head = new Node<T>{items[0], nullptr}; // Первый узел
+    head = new Node{items[0], nullptr}; // Первый узел
     tail = head; // смотрит за концом
     
     for (int i = 1; i < length; i++) {
-        tail->next = new Node<T>{items[i], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
+        tail->next = new Node{items[i], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
         tail = tail->next; // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
     }
 }
@@ -24,13 +24,13 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other): head(nullptr), tail(nullp
 
     if (other.head == nullptr) return;
 
-    head = new Node<T>{other.head->data, nullptr};
+    head = new Node{other.head->data, nullptr};
     tail = head;
 
-    Node<T>* current = other.head->next;
+    Node* current = other.head->next;
 
     while (current != nullptr) {
-        tail->next = new Node<T>{current->data, nullptr};
+        tail->next = new Node{current->data, nullptr};
         tail = tail->next;
         current = current->next;
     }
@@ -40,9 +40,9 @@ template <class T>
 LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
     if (this == &other) return *this; // Чтобы не самоприсваивать
 
-    Node<T>* current = head;
+    Node* current = head;
     while (current != nullptr) {
-        Node<T>* tmp = current;
+        Node* tmp = current;
         current = current->next;
         delete tmp;
     }
@@ -77,7 +77,7 @@ template <class T>
 const T& LinkedList<T>::get(int index) const {
     if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
 
-    Node<T>* current = head;
+    Node* current = head;
 
     for (int i = 0; i < index; i++) {
         current = current->next;
@@ -100,18 +100,18 @@ LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
     LinkedList* sub_list = new LinkedList<T>();
     sub_list->length = end - start + 1;
 
-    Node<T>* current = head;
+    Node* current = head;
 
     for (int i = 0; i < start; i++) {
         current = current->next;
     }
 
-    sub_list->head = new Node<T>{current->data, nullptr};
+    sub_list->head = new Node{current->data, nullptr};
     sub_list->tail = sub_list->head;
 
     for (int i = 0; i < end - start; i++) {
         current = current->next;
-        sub_list->tail->next = new Node<T>{current->data, nullptr};
+        sub_list->tail->next = new Node{current->data, nullptr};
         sub_list->tail = sub_list->tail->next;
     }
 
@@ -121,7 +121,7 @@ LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
 template <class T>
 void LinkedList<T>::append(T item) {
 
-    Node<T>* new_node = new Node<T>{item, nullptr};
+    Node* new_node = new Node{item, nullptr};
 
     if (head == nullptr) {
         head = new_node;
@@ -138,7 +138,7 @@ void LinkedList<T>::append(T item) {
 template <class T>
 void LinkedList<T>::prepend(T item) {
 
-    Node<T>* new_node = new Node<T>{item, nullptr};
+    Node* new_node = new Node{item, nullptr};
 
     if (head == nullptr) {
         head = new_node;
@@ -169,9 +169,8 @@ void LinkedList<T>::insert_at(T item, int index) {
         return;
     }
     
-    Node<T>* new_node = new Node<T>{item, nullptr};
-
-    Node<T>* current = head;
+    Node* new_node = new Node{item, nullptr};
+    Node* current = head;
 
     for (int i = 0; i < index - 1; i++) {
         current = current->next;
@@ -189,7 +188,7 @@ LinkedList<T>* LinkedList<T>::concat(const LinkedList<T>* other) {
 
     LinkedList<T>* concat_list = new LinkedList<T>();
 
-    Node<T>* current = head;
+    Node* current = head;
 
     for (int i = 0; i < length; i++) {
         concat_list->append(current->data);
@@ -209,10 +208,10 @@ LinkedList<T>* LinkedList<T>::concat(const LinkedList<T>* other) {
 template <class T>
 LinkedList<T>::~LinkedList() {
     
-    Node<T>* current = head;
+    Node* current = head;
 
     for (int i = 0; i < length; i++) {
-        Node<T>* tmp = current;
+        Node* tmp = current;
         current = current->next;
         delete tmp;
     }
