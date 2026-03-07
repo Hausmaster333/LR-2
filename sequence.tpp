@@ -402,7 +402,7 @@ Sequence<T>* ListSequence<T>::where(bool (*predicate)(const T& elem)) {
             index++;
         }
     }
-
+    // убрать лишнее копирование
     where_list->list = new LinkedList<T>(items, index);
 
     delete[] items;

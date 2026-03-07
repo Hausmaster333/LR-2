@@ -2,8 +2,22 @@
 #include "sequence.h"
 #include <iostream>
 #include <cstdlib>
+#include <string>
 
 const int MAX_SEQUENCES = 10;
+
+void read_int(int& value) {
+    std::string line;
+    while (true) {
+        std::getline(std::cin, line);
+        try {
+            size_t pos;
+            value = std::stoi(line, &pos); // Преобразуем строку в int, принимаем только int
+            if (pos == line.size()) return; // Проверка на лишние символы
+        } catch (...) {}
+        std::cout << "Incorrect input! Try again: ";
+    }
+}
 
 Sequence<int>* sequences[MAX_SEQUENCES];
 int seq_count = 0;
@@ -41,43 +55,51 @@ void print_bit_sequence(BitSequence* seq) {
     std::cout << "]" << std::endl;
 }
 
-int select_sequence(const char* prompt) {
+int select_sequence(const char* value) {
     if (seq_count == 0) {
         std::cout << "No sequences created" << std::endl;
         return -1;
     }
-    std::cout << prompt << std::endl;
+
+    std::cout << value << std::endl;
     for (int i = 0; i < seq_count; i++) {
         std::cout << i << ": ";
         print_sequence(sequences[i]);
     }
+
     std::cout << "Index: ";
     int idx;
-    std::cin >> idx;
+    read_int(idx);
+
     if (idx < 0 || idx >= seq_count) {
         std::cout << "Invalid index" << std::endl;
         return -1;
     }
+
     return idx;
 }
 
-int select_bit_sequence(const char* prompt) {
+int select_bit_sequence(const char* value) {
     if (bit_seq_count == 0) {
         std::cout << "No BitSequences created" << std::endl;
         return -1;
     }
-    std::cout << prompt << std::endl;
+    
+    std::cout << value << std::endl;
     for (int i = 0; i < bit_seq_count; i++) {
         std::cout << i << ": ";
         print_bit_sequence(bit_sequences[i]);
     }
+
     std::cout << "Index: ";
     int idx;
-    std::cin >> idx;
+    read_int(idx);
+
     if (idx < 0 || idx >= bit_seq_count) {
         std::cout << "Invalid index" << std::endl;
         return -1;
     }
+
     return idx;
 }
 
@@ -91,7 +113,7 @@ void menu_create_sequence() {
     std::cout << "Choice: ";
 
     int choice;
-    std::cin >> choice;
+    read_int(choice);
 
     if (choice == 5) {
         if (bit_seq_count >= MAX_SEQUENCES) {
@@ -99,13 +121,15 @@ void menu_create_sequence() {
             return;
         }
         std::cout << "Enter number of bits: ";
+
         int n;
-        std::cin >> n;
+        read_int(n);
+
         BitSequence* bs = new BitSequence(new MutableArraySequence<Bit>());
         for (int i = 0; i < n; i++) {
             std::cout << "Bit " << i << " (0/1): ";
             int val;
-            std::cin >> val;
+            read_int(val);
             bs->append(Bit(val));
         }
         bit_sequences[bit_seq_count++] = bs;
@@ -120,7 +144,7 @@ void menu_create_sequence() {
 
     std::cout << "Enter number of elements: ";
     int n;
-    std::cin >> n;
+    read_int(n);
 
     Sequence<int>* seq = nullptr;
     switch (choice) {
@@ -144,7 +168,7 @@ void menu_create_sequence() {
     for (int i = 0; i < n; i++) {
         std::cout << "Element " << i << ": ";
         int val;
-        std::cin >> val;
+        read_int(val);
         Sequence<int>* result = seq->append(val);
         if (result != seq) { // Если Immutable заменяем указатель
             delete seq;
@@ -162,7 +186,7 @@ void menu_add_element() {
 
     std::cout << "Enter element: ";
     int val;
-    std::cin >> val;
+    read_int(val);
 
     Sequence<int>* result = sequences[idx]->append(val);
     if (result != sequences[idx]) { // Immutable
@@ -195,7 +219,7 @@ void menu_get_element() {
 
     std::cout << "Enter element index: ";
     int pos;
-    std::cin >> pos;
+    read_int(pos);
 
     try {
         std::cout << "Element: " << sequences[idx]->get(pos) << std::endl;
@@ -210,10 +234,10 @@ void menu_get_subsequence() {
 
     std::cout << "Start index: ";
     int start;
-    std::cin >> start;
+    read_int(start);
     std::cout << "End index: ";
     int end;
-    std::cin >> end;
+    read_int(end);
 
     try {
         Sequence<int>* sub = sequences[idx]->get_sub_sequence(start, end);
@@ -311,7 +335,7 @@ void menu_bit_operations() {
     std::cout << "Choice: ";
 
     int choice;
-    std::cin >> choice;
+    read_int(choice);
 
     if (choice == 4) {
         int idx = select_bit_sequence("Select BitSequence:");
@@ -383,7 +407,7 @@ void run_menu() {
         std::cout << "11. Run tests" << std::endl;
         std::cout << "0. Exit" << std::endl;
         std::cout << "Choice: ";
-        std::cin >> choice;
+        read_int(choice);
 
         switch (choice) {
             case 1: 
