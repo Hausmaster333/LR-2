@@ -6,7 +6,6 @@ class DynamicArray {
     private:
         T* data;
         int size;
-    // массив массивов и список массивов
     public:
         DynamicArray();
         DynamicArray(int size);

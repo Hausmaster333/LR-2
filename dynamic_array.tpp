@@ -52,7 +52,6 @@ const T& DynamicArray<T>::get(int index) const {
 
     return data[index];
 }
-// const ссылку возвращать
 
 template <class T>
 int DynamicArray<T>::get_size() const {
