@@ -39,6 +39,7 @@ class BitSequence : public Sequence<Bit> {
         Sequence<Bit>* map(Bit (*func)(const Bit& elem)) override;
         Sequence<Bit>* where(bool (*predicate)(const Bit& elem)) override;
         Bit reduce(Bit (*func)(const Bit& first_elem, const Bit& second_elem), const Bit& initial_elem) override;
+        // Sequence<Sequence<Bit>*>* split(bool (*predicate)(const Bit&));
 
         BitSequence* bit_and(const BitSequence& other) const; // И
         BitSequence* bit_or(const BitSequence& other) const; // ИЛИ

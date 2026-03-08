@@ -1,3 +1,4 @@
+#include "utils.h"
 #include "sequence.h"
 #include "bit_sequence.h"
 #include <gtest/gtest.h>
@@ -12,6 +13,14 @@ bool is_positive(const int& x) {
 
 int sum(const int& a, const int& b) {
     return a + b;
+}
+
+bool is_zero(const int& x) {
+    return x == 0;
+}
+
+bool is_zero_bit(const Bit& b) {
+    return !b.get();
 }
 
 TEST(DynamicArrayTest, Constructors) {
@@ -822,7 +831,7 @@ TEST(ListOfArraysTest, PrependAndAccess) {
     EXPECT_EQ(list.get_last().get(0), 1);
 }
 
-TEST(ListOfArraysTest, IndependentCopy) {
+TEST(ListOfAяrraysTest, IndependentCopy) {
     LinkedList<DynamicArray<int>> original;
 
     DynamicArray<int> row(2);
@@ -839,6 +848,280 @@ TEST(ListOfArraysTest, IndependentCopy) {
 
 // =======================
 
+TEST(SplitTest, MutableArrayBasic) {
+    int items[] = {1, 2, 0, 3, 4, 0, 5};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 7);
+
+    auto* split_seq = split(seq, is_zero);
+
+    EXPECT_EQ(split_seq->get_count(), 3);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 2);
+    EXPECT_EQ(split_seq->get(0)->get(0), 1);
+    EXPECT_EQ(split_seq->get(0)->get(1), 2);
+    EXPECT_EQ(split_seq->get(1)->get_count(), 2);
+    EXPECT_EQ(split_seq->get(1)->get(0), 3);
+    EXPECT_EQ(split_seq->get(1)->get(1), 4);
+    EXPECT_EQ(split_seq->get(2)->get_count(), 1);
+    EXPECT_EQ(split_seq->get(2)->get(0), 5);
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+    delete seq;
+}
+
+TEST(SplitTest, MutableListBasic) {
+    int items[] = {1, 2, 0, 3, 4, 0, 5};
+    Sequence<int>* seq = new MutableListSequence<int>(items, 7);
+
+    auto* split_seq = split(seq, is_zero);
+
+    EXPECT_EQ(split_seq->get_count(), 3);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 2);
+    EXPECT_EQ(split_seq->get(1)->get_count(), 2);
+    EXPECT_EQ(split_seq->get(2)->get_count(), 1);
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+    delete seq;
+}
+
+TEST(SplitTest, DelimiterAtStart) {
+    int items[] = {0, 1, 2, 3};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 4);
+
+    auto* split_seq = split(seq, is_zero);
+
+    EXPECT_EQ(split_seq->get_count(), 2);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 0); // пустой фрагмент до разделителя
+    EXPECT_EQ(split_seq->get(1)->get_count(), 3);
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+    delete seq;
+}
+
+TEST(SplitTest, DelimiterAtEnd) {
+    int items[] = {1, 2, 3, 0};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 4);
+
+    auto* split_seq = split(seq, is_zero);
+
+    EXPECT_EQ(split_seq->get_count(), 2);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 3);
+    EXPECT_EQ(split_seq->get(1)->get_count(), 0); // пустой фрагмент после разделителя
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+    delete seq;
+}
+
+TEST(SplitTest, NoDelimiter) {
+    int items[] = {1, 2, 3};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 3);
+
+    auto* split_seq = split(seq, is_zero);
+
+    EXPECT_EQ(split_seq->get_count(), 1);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 3);
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+    delete seq;
+}
+
+TEST(SplitTest, EmptySequence) {
+    Sequence<int>* seq = new MutableArraySequence<int>();
+
+    auto* split_seq = split(seq, is_zero);
+
+    EXPECT_EQ(split_seq->get_count(), 1);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 0);
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+    delete seq;
+}
+
+TEST(SplitTest, BitSequenceSplit) {
+    BitSequence seq;
+    seq.append(Bit(1));
+    seq.append(Bit(0));
+    seq.append(Bit(1));
+    seq.append(Bit(1));
+    seq.append(Bit(0));
+    seq.append(Bit(1));
+
+    auto* split_seq = split(&seq, is_zero_bit); // разделитель — 0
+
+    EXPECT_EQ(split_seq->get_count(), 3);
+    EXPECT_EQ(split_seq->get(0)->get_count(), 1);
+    EXPECT_EQ(split_seq->get(1)->get_count(), 2);
+    EXPECT_EQ(split_seq->get(2)->get_count(), 1);
+
+    for (int i = 0; i < split_seq->get_count(); i++) {
+        delete split_seq->get(i);
+    }
+
+    delete split_seq;
+}
+
+// =======================
+
+TEST(SliceTest, MutableArrayBasic) {
+    int items[] = {1, 2, 3, 4, 5};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 5);
+
+    int rep_items[] = {9, 10};
+    Sequence<int>* replacement = new MutableArraySequence<int>(rep_items, 2);
+
+    Sequence<int>* sliced_seq = seq->slice(1, 2, replacement);
+
+    EXPECT_EQ(sliced_seq->get_count(), 5);
+    EXPECT_EQ(sliced_seq->get(0), 1);
+    EXPECT_EQ(sliced_seq->get(1), 9);
+    EXPECT_EQ(sliced_seq->get(2), 10);
+    EXPECT_EQ(sliced_seq->get(3), 4);
+    EXPECT_EQ(sliced_seq->get(4), 5);
+
+    delete sliced_seq;
+    delete replacement;
+    delete seq;
+}
+
+TEST(SliceTest, MutableListBasic) {
+    int items[] = {1, 2, 3, 4, 5};
+    Sequence<int>* seq = new MutableListSequence<int>(items, 5);
+
+    int rep_items[] = {9, 10};
+    Sequence<int>* replacement = new MutableListSequence<int>(rep_items, 2);
+
+    Sequence<int>* sliced_seq = seq->slice(1, 2, replacement);
+
+    EXPECT_EQ(sliced_seq->get_count(), 5);
+    EXPECT_EQ(sliced_seq->get(0), 1);
+    EXPECT_EQ(sliced_seq->get(1), 9);
+    EXPECT_EQ(sliced_seq->get(2), 10);
+    EXPECT_EQ(sliced_seq->get(3), 4);
+    EXPECT_EQ(sliced_seq->get(4), 5);
+
+    delete sliced_seq;
+    delete replacement;
+    delete seq;
+}
+
+TEST(SliceTest, DeleteWithoutReplacement) {
+    int items[] = {1, 2, 3, 4, 5};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 5);
+
+    Sequence<int>* sliced_seq = seq->slice(1, 2);
+
+    EXPECT_EQ(sliced_seq->get_count(), 3);
+    EXPECT_EQ(sliced_seq->get(0), 1);
+    EXPECT_EQ(sliced_seq->get(1), 4);
+    EXPECT_EQ(sliced_seq->get(2), 5);
+
+    delete sliced_seq;
+    delete seq;
+}
+
+TEST(SliceTest, NegativeIndex) {
+    int items[] = {1, 2, 3, 4, 5};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 5);
+
+    Sequence<int>* sliced_seq = seq->slice(-2, 1); // index = 3, удаляем 1 элемент
+
+    EXPECT_EQ(sliced_seq->get_count(), 4);
+    EXPECT_EQ(sliced_seq->get(0), 1);
+    EXPECT_EQ(sliced_seq->get(1), 2);
+    EXPECT_EQ(sliced_seq->get(2), 3);
+    EXPECT_EQ(sliced_seq->get(3), 5);
+
+    delete sliced_seq;
+    delete seq;
+}
+
+TEST(SliceTest, NegativeIndexWithReplacement) {
+    int items[] = {1, 2, 3, 4, 5};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 5);
+
+    int rep_items[] = {99};
+    Sequence<int>* replacement = new MutableArraySequence<int>(rep_items, 1);
+
+    Sequence<int>* sliced_seq = seq->slice(-3, 2, replacement); // index = 2, удаляем 2
+
+    EXPECT_EQ(sliced_seq->get_count(), 4);
+    EXPECT_EQ(sliced_seq->get(0), 1);
+    EXPECT_EQ(sliced_seq->get(1), 2);
+    EXPECT_EQ(sliced_seq->get(2), 99);
+    EXPECT_EQ(sliced_seq->get(3), 5);
+
+    delete sliced_seq;
+    delete replacement;
+    delete seq;
+}
+
+TEST(SliceTest, IndexOutOfRange) {
+    int items[] = {1, 2, 3};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 3);
+
+    EXPECT_THROW(seq->slice(5, 1), std::out_of_range);
+    EXPECT_THROW(seq->slice(-4, 1), std::out_of_range);
+
+    delete seq;
+}
+
+TEST(SliceTest, DeleteMoreThanAvailable) {
+    int items[] = {1, 2, 3, 4, 5};
+    Sequence<int>* seq = new MutableArraySequence<int>(items, 5);
+
+    Sequence<int>* sliced_seq = seq->slice(3, 100); // просит 100, но от позиции 3 только 2
+
+    EXPECT_EQ(sliced_seq->get_count(), 3);
+    EXPECT_EQ(sliced_seq->get(0), 1);
+    EXPECT_EQ(sliced_seq->get(1), 2);
+    EXPECT_EQ(sliced_seq->get(2), 3);
+
+    delete sliced_seq;
+    delete seq;
+}
+
+TEST(SliceTest, BitSequenceSlice) {
+    BitSequence seq;
+    seq.append(Bit(1));
+    seq.append(Bit(0));
+    seq.append(Bit(1));
+    seq.append(Bit(0));
+    seq.append(Bit(1));
+
+    Sequence<Bit>* sliced_seq = seq.slice(1, 2); // удаляем 2 бита с позиции 1
+
+    EXPECT_EQ(sliced_seq->get_count(), 3);
+    EXPECT_EQ(sliced_seq->get(0), Bit(1));
+    EXPECT_EQ(sliced_seq->get(1), Bit(0));
+    EXPECT_EQ(sliced_seq->get(2), Bit(1));
+
+    delete sliced_seq;
+}
+
+// =======================
 
 TEST(SequencePolymorhTest, ArrayAndList) {
     Sequence<int>* arr = new MutableArraySequence<int>();
