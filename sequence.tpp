@@ -1,7 +1,7 @@
-#include <stdexcept>
 #include "sequence.h"
 #include "dynamic_array.h"
 #include "linked_list.h"
+#include <stdexcept>
 
 template <class T>
 ArraySequence<T>::ArraySequence() : count(0) {
@@ -96,7 +96,7 @@ Sequence<T>* ArraySequence<T>::get_sub_sequence(int start, int end) {
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::append(T item) {
+Sequence<T>* ArraySequence<T>::append(const T& item) {
     ArraySequence<T>* inst = Instance();
 
     int size = inst->array->get_size();
@@ -113,7 +113,7 @@ Sequence<T>* ArraySequence<T>::append(T item) {
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::prepend(T item) {
+Sequence<T>* ArraySequence<T>::prepend(const T& item) {
     ArraySequence<T>* inst = Instance();
 
     int size = inst->array->get_size();
@@ -133,8 +133,7 @@ Sequence<T>* ArraySequence<T>::prepend(T item) {
 }
 
 template <class T>
-Sequence<T>* ArraySequence<T>::insert_at(T item, int index) {
-
+Sequence<T>* ArraySequence<T>::insert_at(const T& item, int index) {
     ArraySequence<T>* inst = Instance();
 
     if (index < 0 || index > inst->count) {
@@ -163,66 +162,51 @@ Sequence<T>* ArraySequence<T>::concat(const Sequence<T>* other) {
         throw std::invalid_argument("Cannot concat with nullptr\n");
     }
 
-    int new_count = count + other->get_count();
-    T* items = new T[new_count];
-
-    for (int i = 0; i < count; i++) {
-        items[i] = array->get(i);
-    }
-
-    for (int i = 0; i < other->get_count(); i++) {
-        items[count + i] = other->get(i);
-    }
-
     ArraySequence<T>* concat_arr = EmptyClone();
-    delete concat_arr->array;
-    concat_arr->array = new DynamicArray<T>(items, new_count);
-    concat_arr->count = new_count;
+    concat_arr->array->resize(count + other->get_count());
+    concat_arr->count = count + other->get_count();
 
-    delete[] items;
+    for (int this_index = 0; this_index < count; this_index++) {
+        concat_arr->array->set(this_index, get(this_index));
+    }
+
+    for (int other_index = 0; other_index < other->get_count(); other_index++) {
+        concat_arr->array->set(count + other_index, other->get(other_index));
+    }
 
     return concat_arr;
 }
 
 template <class T>
 Sequence<T>* ArraySequence<T>::map(T (*func)(const T& elem)) {
-    T* items = new T[count];
-
-    for (int i = 0; i < count; i++) {
-        T mapped_elem = func(get(i));
-        items[i] = mapped_elem;
-    }
-
     ArraySequence<T>* mapped_arr = EmptyClone();
-    
-    delete mapped_arr->array;
-    mapped_arr->array = new DynamicArray<T>(items, count);
+    mapped_arr->array->resize(count);
     mapped_arr->count = count;
+
+    for (int index = 0; index < count; index++) {
+        mapped_arr->array->set(index, func(get(index)));
+    }
 
     return mapped_arr;
 }
 
 template <class T>
 Sequence<T>* ArraySequence<T>::where(bool (*predicate)(const T& elem)) {
-    T* items = new T[count];
-    int new_count = 0;
+    ArraySequence<T>* where_arr = EmptyClone();
+    where_arr->array->resize(count);
 
-    for (int i = 0; i < get_count(); i++) {
+    int new_count = 0;
+    for (int i = 0; i < count; i++) {
         T current_elem = get(i);
 
         if (predicate(current_elem)) {
-            items[new_count] = current_elem;
+            where_arr->array->set(new_count, current_elem);
             new_count++;
-        }
+        }        
     }
 
-    ArraySequence<T>* where_arr = EmptyClone();
-
-    delete where_arr->array;
-    where_arr->array = new DynamicArray<T>(items, new_count);
+    where_arr->array->resize(new_count);
     where_arr->count = new_count;
-
-    delete[] items;
 
     return where_arr;
 }
@@ -277,7 +261,7 @@ template <class T>
 const T& ListSequence<T>::get(int index) const {
     if (index < 0 || index >= list->get_length()) throw std::out_of_range("Sequence is empty");
 
-    return list->get(index); // Итератор в реализации заюзать!!!
+    return list->get(index);
 }
 
 template <class T>
@@ -322,7 +306,7 @@ Sequence<T>* ListSequence<T>::get_sub_sequence(int start, int end) {
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::append(T item) {
+Sequence<T>* ListSequence<T>::append(const T& item) {
     ListSequence<T>* inst = Instance();
 
     inst->list->append(item);
@@ -330,7 +314,7 @@ Sequence<T>* ListSequence<T>::append(T item) {
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::prepend(T item) {
+Sequence<T>* ListSequence<T>::prepend(const T& item) {
     ListSequence<T>* inst = Instance();
 
     inst->list->prepend(item);
@@ -338,7 +322,7 @@ Sequence<T>* ListSequence<T>::prepend(T item) {
 }
 
 template <class T>
-Sequence<T>* ListSequence<T>::insert_at(T item, int index) {
+Sequence<T>* ListSequence<T>::insert_at(const T& item, int index) {
     ListSequence<T>* inst = Instance();
 
     inst->list->insert_at(item, index);
@@ -353,14 +337,17 @@ Sequence<T>* ListSequence<T>::concat(const Sequence<T>* other) {
     
     ListSequence<T>* concat_list = EmptyClone();
 
-    LinkedList<T>* new_list = new LinkedList<T>(*list);
-
-    for (int i = 0; i < other->get_count(); i++) { // СДЕЛАТЬ ЧЕРЕЗ ИТЕРАТОР
-        new_list->append(other->get(i));
+    IEnumerator<T>* this_iter = get_enumerator();
+    while(this_iter->move_next()) {
+        concat_list->list->append(this_iter->get_current());
     }
+    delete this_iter;
 
-    delete concat_list->list;
-    concat_list->list = new_list;
+    IEnumerator<T>* other_iter = other->get_enumerator();
+    while(other_iter->move_next()) {
+        concat_list->list->append(other_iter->get_current());
+    }
+    delete other_iter;
 
     return concat_list;
 }
@@ -368,44 +355,31 @@ Sequence<T>* ListSequence<T>::concat(const Sequence<T>* other) {
 template <class T>
 Sequence<T>* ListSequence<T>::map(T (*func)(const T& elem)) {
     ListSequence<T>* mapped_list = EmptyClone();
-    delete mapped_list->list;
 
-    T* items = new T[get_count()];
-    int index = 0;
-
-    for (auto current = start(); current != end(); ++current) {
-        T current_elem = *current;
-        T mapped_elem = func(current_elem);
-        items[index] = mapped_elem;
-        index++;
+    IEnumerator<T>* iter = get_enumerator();
+    while (iter->move_next()) {
+        T current_mapped_elem = func(iter->get_current());
+        mapped_list->list->append(current_mapped_elem);
     }
+    delete iter;
 
-    mapped_list->list = new LinkedList<T>(items, get_count());
-
-    delete[] items;
     return mapped_list;
 }
 
 template <class T>
 Sequence<T>* ListSequence<T>::where(bool (*predicate)(const T& elem)) {
     ListSequence<T>* where_list = EmptyClone();
-    delete where_list->list;
 
-    T* items = new T[get_count()];
-    int index = 0;
-
-    for (auto current = start(); current != end(); ++current) {
-        T current_elem = *current;
+    IEnumerator<T>* iter = get_enumerator();
+    while(iter->move_next()) {
+        T current_elem = iter->get_current();
 
         if (predicate(current_elem)) {
-            items[index] = current_elem;
-            index++;
+            where_list->list->append(current_elem);
         }
     }
-    // убрать лишнее копирование
-    where_list->list = new LinkedList<T>(items, index);
+    delete iter;
 
-    delete[] items;
     return where_list;
 }
 
@@ -413,63 +387,12 @@ template <class T>
 T ListSequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) {
     T reduced_elem = initial_elem;
 
-    for (auto current = start(); current != end(); ++current) {
-        T current_elem = *current;
+    IEnumerator<T>* iter = get_enumerator();
+    while (iter->move_next()) {
+        T current_elem = iter->get_current();
         reduced_elem = func(current_elem, reduced_elem);
     }
+    delete iter;
 
     return reduced_elem;
-}
-
-BitSequence* BitSequence::bit_and(const BitSequence& other) const {
-    if (get_count() != other.get_count()) {
-        throw std::out_of_range("Sequences must have same length\n");
-    }
-
-    Sequence<Bit>* seq_and = new MutableArraySequence<Bit>(); // Реализация по умолчанию, можно и List, НО НЕ Immutable...
-    
-    for (int i = 0; i < get_count(); i++) {
-        seq_and->append(get(i) & other.get(i));
-    }
-
-    return new BitSequence(seq_and);
-}
-
-BitSequence* BitSequence::bit_or(const BitSequence& other) const {
-    if (get_count() != other.get_count()) {
-        throw std::out_of_range("Sequences must have same length\n");
-    }
-
-    Sequence<Bit>* seq_or = new MutableArraySequence<Bit>();
-
-    for (int i = 0; i < get_count(); i++) {
-        seq_or->append(get(i) | other.get(i));
-    }
-
-    return new BitSequence(seq_or);
-}
-
-BitSequence* BitSequence::bit_xor(const BitSequence& other) const {
-    if (get_count() != other.get_count()) {
-        throw std::out_of_range("Sequences must have same length\n");
-    }
-
-    Sequence<Bit>* seq_xor = new MutableArraySequence<Bit>();
-
-    for (int i = 0; i < get_count(); i++) {
-        seq_xor->append(get(i) ^ other.get(i));
-    }
-
-    return new BitSequence(seq_xor);
-}
-
-BitSequence* BitSequence::bit_not() const {
-    
-    Sequence<Bit>* seq_not = new MutableArraySequence<Bit>();
-
-    for (int i = 0; i < get_count(); i++) {
-        seq_not->append(~get(i));
-    }
-    
-    return new BitSequence(seq_not);
 }

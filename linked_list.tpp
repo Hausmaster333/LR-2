@@ -36,28 +36,28 @@ LinkedList<T>::LinkedList(const LinkedList<T>& other): head(nullptr), tail(nullp
     }
 }
 
-template <class T>
-LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
-    if (this == &other) return *this; // Чтобы не самоприсваивать
+// template <class T>
+// LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
+//     if (this == &other) return *this; // Чтобы не самоприсваивать
 
-    Node* current = head;
-    while (current != nullptr) {
-        Node* tmp = current;
-        current = current->next;
-        delete tmp;
-    }
+//     Node* current = head;
+//     while (current != nullptr) {
+//         Node* tmp = current;
+//         current = current->next;
+//         delete tmp;
+//     }
 
-    head = nullptr;
-    tail = nullptr;
-    length = 0;
+//     head = nullptr;
+//     tail = nullptr;
+//     length = 0;
 
-    for (auto curr = other.start(); curr != other.end(); curr++) {
-        T curr_elem = *curr;
-        append(curr_elem);
-    }
+//     for (auto curr = other.start(); curr != other.end(); curr++) {
+//         T curr_elem = *curr;
+//         append(curr_elem);
+//     }
 
-    return *this;
-}
+//     return *this;
+// }
 
 template <class T>
 const T& LinkedList<T>::get_first() const {
@@ -119,7 +119,7 @@ LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
 }
 
 template <class T>
-void LinkedList<T>::append(T item) {
+void LinkedList<T>::append(const T& item) {
 
     Node* new_node = new Node{item, nullptr};
 
@@ -136,7 +136,7 @@ void LinkedList<T>::append(T item) {
 }
 
 template <class T>
-void LinkedList<T>::prepend(T item) {
+void LinkedList<T>::prepend(const T& item) {
 
     Node* new_node = new Node{item, nullptr};
 
@@ -153,7 +153,7 @@ void LinkedList<T>::prepend(T item) {
 }
 
 template <class T>
-void LinkedList<T>::insert_at(T item, int index) {
+void LinkedList<T>::insert_at(const T& item, int index) {
 
     if (index < 0 || index > length) {
         throw std::out_of_range("Index out of range");

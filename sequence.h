@@ -20,14 +20,16 @@ class Sequence {
 
         virtual Sequence<T>* get_sub_sequence(int start, int end) = 0;
 
-        virtual Sequence<T>* append(T item) = 0;
-        virtual Sequence<T>* prepend(T item) = 0;
-        virtual Sequence<T>* insert_at(T item, int index) = 0;
-        virtual Sequence<T>* concat(const Sequence<T>* other) = 0;
+        virtual Sequence<T>* append(const T& item) = 0;
+        virtual Sequence<T>* prepend(const T& item) = 0;
+        virtual Sequence<T>* insert_at(const T& item, int index) = 0;
 
+        virtual Sequence<T>* concat(const Sequence<T>* other) = 0;
         virtual Sequence<T>* map(T (*func)(const T& elem)) = 0;
         virtual Sequence<T>* where(bool (*predicate)(const T& elem)) = 0;
         virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) = 0;
+
+        virtual IEnumerator<T>* get_enumerator() const = 0;
 
         virtual ~Sequence() {}
 };
@@ -58,17 +60,18 @@ class ArraySequence : public Sequence<T> {
 
         Sequence<T>* get_sub_sequence(int start, int end) override;
 
-        Sequence<T>* append(T item) override;
-        Sequence<T>* prepend(T item) override;
-        Sequence<T>* insert_at(T item, int index) override;
-        Sequence<T>* concat(const Sequence<T>* other) override;
+        Sequence<T>* append(const T& item) override;
+        Sequence<T>* prepend(const T& item) override;
+        Sequence<T>* insert_at(const T& item, int index) override;
 
+        Sequence<T>* concat(const Sequence<T>* other) override;
         Sequence<T>* map(T (*func)(const T& elem)) override;
         Sequence<T>* where(bool (*predicate)(const T& elem)) override;
         T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
 
-        // typename DynamicArray<T>::Iterator start() const { return array->start(); }
-        // typename DynamicArray<T>::Iterator end() const { return array->end(); }
+        IEnumerator<T>* get_enumerator() const override {
+            return array->get_enumerator();
+        }
 
         ~ArraySequence() override {
             delete array;
@@ -100,17 +103,18 @@ class ListSequence : public Sequence<T> {
 
         Sequence<T>* get_sub_sequence(int start, int end) override;
 
-        Sequence<T>* append(T item) override;
-        Sequence<T>* prepend(T item) override;
-        Sequence<T>* insert_at(T item, int index) override;
-        Sequence<T>* concat(const Sequence<T>* other) override;
+        Sequence<T>* append(const T& item) override;
+        Sequence<T>* prepend(const T& item) override;
+        Sequence<T>* insert_at(const T& item, int index) override;
 
+        Sequence<T>* concat(const Sequence<T>* other) override;
         Sequence<T>* map(T (*func)(const T& elem)) override;
         Sequence<T>* where(bool (*predicate)(const T& elem)) override;
         T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
 
-        typename LinkedList<T>::Iterator start() const { return list->start(); }
-        typename LinkedList<T>::Iterator end() const { return list->end(); }
+        IEnumerator<T>* get_enumerator() const override {
+            return list->get_enumerator();
+        }
 
         ~ListSequence() override {
             delete list;
@@ -187,45 +191,6 @@ class ImmutableListSequence : public ListSequence<T> {
         ImmutableListSequence(const T* items, int count) : ListSequence<T>(items, count) {};
         ImmutableListSequence(const LinkedList<T>& other) : ListSequence<T>(other) {};
         ImmutableListSequence(const ListSequence<T>& other) : ListSequence<T>(other) {};
-};
-
-class Bit {
-    private:
-        bool value;
-    public:
-        Bit() : value(false) {}
-        Bit(bool val) : value(val) {}
-        Bit(int val) : value(val != 0) {}
-
-        bool get() const { return value; }
-
-        Bit operator&(const Bit& other) const { return Bit(value && other.value); } // Логическое И
-        Bit operator|(const Bit& other) const { return Bit(value || other.value); } // Логическое ИЛИ
-        Bit operator^(const Bit& other) const { return Bit(value != other.value); } // Логическое XOR
-        Bit operator~() const { return Bit(!value); } // Логическое НЕ
-
-        bool operator==(const Bit& other) const { return value == other.value; }
-        bool operator!=(const Bit& other) const { return value != other.value; }
-};
-
-class BitSequence {
-    private:
-        Sequence<Bit>* seq;
-    public:
-        BitSequence(Sequence<Bit>* sequence) : seq(sequence) {} // Передаем new Mutable[Immutable]Array[List]Sequence<Bit>()
-
-        void append(const Bit& item) { seq->append(item); }
-        const Bit& get(int index) const { return seq->get(index); }
-        int get_count() const { return seq->get_count(); }
-
-        BitSequence* bit_and(const BitSequence& other) const; // И
-        BitSequence* bit_or(const BitSequence& other) const; // ИЛИ
-        BitSequence* bit_xor(const BitSequence& other) const; // XOR
-        BitSequence* bit_not() const; // НЕ
-
-        ~BitSequence() {
-            delete seq;
-        }
 };
 
 #include "sequence.tpp"
