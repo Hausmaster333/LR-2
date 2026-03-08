@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "sequence.h"
 #include "bit_sequence.h"
+#include "utils.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -38,6 +39,10 @@ int sum(const int& a, const int& b) {
     return a + b;
 }
 
+bool is_zero(const int& x) {
+    return x == 0;
+}
+
 void print_sequence(Sequence<int>* seq) {
     std::cout << "[";
     for (int i = 0; i < seq->get_count(); i++) {
@@ -69,15 +74,15 @@ int select_sequence(const char* value) {
     }
 
     std::cout << "Index: ";
-    int idx;
-    read_int(idx);
+    int index;
+    read_int(index);
 
-    if (idx < 0 || idx >= seq_count) {
+    if (index < 0 || index >= seq_count) {
         std::cout << "Invalid index" << std::endl;
         return -1;
     }
 
-    return idx;
+    return index;
 }
 
 int select_bit_sequence(const char* value) {
@@ -93,15 +98,15 @@ int select_bit_sequence(const char* value) {
     }
 
     std::cout << "Index: ";
-    int idx;
-    read_int(idx);
+    int index;
+    read_int(index);
 
-    if (idx < 0 || idx >= bit_seq_count) {
+    if (index < 0 || index >= bit_seq_count) {
         std::cout << "Invalid index" << std::endl;
         return -1;
     }
 
-    return idx;
+    return index;
 }
 
 void menu_create_sequence() {
@@ -182,17 +187,17 @@ void menu_create_sequence() {
 }
 
 void menu_add_element() {
-    int idx = select_sequence("Select sequence:");
-    if (idx == -1) return;
+    int index = select_sequence("Select sequence:");
+    if (index == -1) return;
 
     std::cout << "Enter element: ";
     int val;
     read_int(val);
 
-    Sequence<int>* result = sequences[idx]->append(val);
-    if (result != sequences[idx]) { // Immutable
-        delete sequences[idx];
-        sequences[idx] = result;
+    Sequence<int>* result = sequences[index]->append(val);
+    if (result != sequences[index]) { // Immutable
+        delete sequences[index];
+        sequences[index] = result;
     }
     std::cout << "Element added" << std::endl;
 }
@@ -215,23 +220,23 @@ void menu_print_sequence() {
 }
 
 void menu_get_element() {
-    int idx = select_sequence("Select sequence:");
-    if (idx == -1) return;
+    int index = select_sequence("Select sequence:");
+    if (index == -1) return;
 
     std::cout << "Enter element index: ";
     int pos;
     read_int(pos);
 
     try {
-        std::cout << "Element: " << sequences[idx]->get(pos) << std::endl;
+        std::cout << "Element: " << sequences[index]->get(pos) << std::endl;
     } catch (const std::out_of_range& e) {
         std::cout << "Error: " << e.what() << std::endl;
     }
 }
 
 void menu_get_subsequence() {
-    int idx = select_sequence("Select sequence:");
-    if (idx == -1) return;
+    int index = select_sequence("Select sequence:");
+    if (index == -1) return;
 
     std::cout << "Start index: ";
     int start;
@@ -241,7 +246,7 @@ void menu_get_subsequence() {
     read_int(end);
 
     try {
-        Sequence<int>* sub = sequences[idx]->get_sub_sequence(start, end);
+        Sequence<int>* sub = sequences[index]->get_sub_sequence(start, end);
         std::cout << "Subsequence: ";
         print_sequence(sub);
 
@@ -258,12 +263,12 @@ void menu_get_subsequence() {
 }
 
 void menu_concat_sequences() {
-    int idx1 = select_sequence("Select first sequence:");
-    if (idx1 == -1) return;
-    int idx2 = select_sequence("Select second sequence:");
-    if (idx2 == -1) return;
+    int index1 = select_sequence("Select first sequence:");
+    if (index1 == -1) return;
+    int index2 = select_sequence("Select second sequence:");
+    if (index2 == -1) return;
 
-    Sequence<int>* result = sequences[idx1]->concat(sequences[idx2]);
+    Sequence<int>* result = sequences[index1]->concat(sequences[index2]);
     std::cout << "Result: ";
     print_sequence(result);
 
@@ -277,17 +282,17 @@ void menu_concat_sequences() {
 }
 
 void menu_map() {
-    int idx = select_sequence("Select sequence:");
-    if (idx == -1) return;
+    int index = select_sequence("Select sequence:");
+    if (index == -1) return;
 
-    Sequence<int>* result = sequences[idx]->map(square);
+    Sequence<int>* result = sequences[index]->map(square);
     std::cout << "Result map(square): ";
     print_sequence(result);
 
-    if (result != sequences[idx] && seq_count < MAX_SEQUENCES) {
+    if (result != sequences[index] && seq_count < MAX_SEQUENCES) {
         sequences[seq_count++] = result;
         std::cout << "Saved as index " << seq_count - 1 << std::endl;
-    } else if (result == sequences[idx]) {
+    } else if (result == sequences[index]) {
         std::cout << "Sequence modified in place" << std::endl;
     } else {
         delete result;
@@ -296,17 +301,17 @@ void menu_map() {
 }
 
 void menu_where() {
-    int idx = select_sequence("Select sequence:");
-    if (idx == -1) return;
+    int index = select_sequence("Select sequence:");
+    if (index == -1) return;
 
-    Sequence<int>* result = sequences[idx]->where(is_positive);
+    Sequence<int>* result = sequences[index]->where(is_positive);
     std::cout << "Result where(positive): ";
     print_sequence(result);
 
-    if (result != sequences[idx] && seq_count < MAX_SEQUENCES) {
+    if (result != sequences[index] && seq_count < MAX_SEQUENCES) {
         sequences[seq_count++] = result;
         std::cout << "Saved as index " << seq_count - 1 << std::endl;
-    } else if (result == sequences[idx]) {
+    } else if (result == sequences[index]) {
         std::cout << "Sequence modified in place" << std::endl;
     } else {
         delete result;
@@ -315,15 +320,15 @@ void menu_where() {
 }
 
 void menu_reduce() {
-    int idx = select_sequence("Select sequence:");
-    if (idx == -1) return;
+    int index = select_sequence("Select sequence:");
+    if (index == -1) return;
 
-    if (sequences[idx]->get_count() == 0) {
+    if (sequences[index]->get_count() == 0) {
         std::cout << "Sequence is empty" << std::endl;
         return;
     }
 
-    int result = sequences[idx]->reduce(sum, 0);
+    int result = sequences[index]->reduce(sum, 0);
     std::cout << "Result reduce(sum): " << result << std::endl;
 }
 
@@ -339,10 +344,10 @@ void menu_bit_operations() {
     read_int(choice);
 
     if (choice == 4) {
-        int idx = select_bit_sequence("Select BitSequence:");
-        if (idx == -1) return;
+        int index = select_bit_sequence("Select BitSequence:");
+        if (index == -1) return;
 
-        BitSequence* result = bit_sequences[idx]->bit_not();
+        BitSequence* result = bit_sequences[index]->bit_not();
         std::cout << "Result NOT: ";
         print_bit_sequence(result);
 
@@ -356,16 +361,16 @@ void menu_bit_operations() {
         return;
     }
 
-    int idx1 = select_bit_sequence("Select first BitSequence:");
-    if (idx1 == -1) return;
-    int idx2 = select_bit_sequence("Select second BitSequence:");
-    if (idx2 == -1) return;
+    int index1 = select_bit_sequence("Select first BitSequence:");
+    if (index1 == -1) return;
+    int index2 = select_bit_sequence("Select second BitSequence:");
+    if (index2 == -1) return;
 
     BitSequence* result = nullptr;
     switch (choice) {
-        case 1: result = bit_sequences[idx1]->bit_and(*bit_sequences[idx2]); break;
-        case 2: result = bit_sequences[idx1]->bit_or(*bit_sequences[idx2]); break;
-        case 3: result = bit_sequences[idx1]->bit_xor(*bit_sequences[idx2]); break;
+        case 1: result = bit_sequences[index1]->bit_and(*bit_sequences[index2]); break;
+        case 2: result = bit_sequences[index1]->bit_or(*bit_sequences[index2]); break;
+        case 3: result = bit_sequences[index1]->bit_xor(*bit_sequences[index2]); break;
         default:
             std::cout << "Invalid choice" << std::endl;
             return;
@@ -381,6 +386,72 @@ void menu_bit_operations() {
         delete result;
         std::cout << "No space to save, result deleted" << std::endl;
     }
+}
+
+void menu_split() {
+    int index = select_sequence("Select sequence to split (delimiter: 0):");
+    if (index == -1) return;
+
+    auto* result = split(sequences[index], is_zero);
+
+    std::cout << "Split into " << result->get_count() << " fragments:" << std::endl;
+    for (int i = 0; i < result->get_count(); i++) {
+        std::cout << "  [" << i << "]: ";
+        print_sequence(result->get(i));
+    }
+
+    for (int i = 0; i < result->get_count(); i++) {
+        delete result->get(i);
+    }
+    delete result;
+}
+
+void menu_slice() {
+    int idx = select_sequence("Select sequence:");
+    if (idx == -1) return;
+
+    std::cout << "Start index (negative = from end): ";
+    int start;
+    read_int(start);
+
+    std::cout << "Number of elements to remove: ";
+    int count;
+    read_int(count);
+
+    std::cout << "Number of replacement elements (0 = just delete): ";
+    int rep_count;
+    read_int(rep_count);
+
+    Sequence<int>* replacement = nullptr;
+    if (rep_count > 0) {
+        replacement = new MutableArraySequence<int>();
+
+        for (int i = 0; i < rep_count; i++) {
+            std::cout << "Replacement element " << i << ": ";
+            int val;
+            read_int(val);
+            replacement->append(val);
+        }
+    }
+
+    try {
+        Sequence<int>* result = sequences[idx]->slice(start, count, replacement);
+        std::cout << "Result: ";
+        print_sequence(result);
+
+        if (seq_count < MAX_SEQUENCES) {
+            sequences[seq_count++] = result;
+            std::cout << "Saved as index " << seq_count - 1 << std::endl;
+        } else {
+            delete result;
+            std::cout << "No space to save, result deleted" << std::endl;
+        }
+
+    } catch (const std::out_of_range& e) {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+
+    delete replacement;
 }
 
 void menu_run_tests() {
@@ -405,7 +476,9 @@ void run_menu() {
         std::cout << "8. Where (positive)" << std::endl;
         std::cout << "9. Reduce (sum)" << std::endl;
         std::cout << "10. BitSequence operations" << std::endl;
-        std::cout << "11. Run tests" << std::endl;
+        std::cout << "11. Split (delimiter: 0)" << std::endl;
+        std::cout << "12. Slice" << std::endl;
+        std::cout << "13. Run tests" << std::endl;
         std::cout << "0. Exit" << std::endl;
         std::cout << "Choice: ";
         read_int(choice);
@@ -442,7 +515,13 @@ void run_menu() {
                 menu_bit_operations(); 
                 break;
             case 11: 
-                menu_run_tests(); 
+                menu_split(); 
+                break;
+            case 12:
+                menu_slice();
+                break;
+            case 13:
+                menu_run_tests();
                 break;
             case 0: 
                 std::cout << "Exit" << std::endl; 
