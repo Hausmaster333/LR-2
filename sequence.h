@@ -29,6 +29,8 @@ class Sequence {
         virtual Sequence<T>* where(bool (*predicate)(const T& elem)) = 0;
         virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) = 0;
 
+        virtual Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
+
         virtual IEnumerator<T>* get_enumerator() const = 0;
 
         virtual ~Sequence() {}
@@ -68,6 +70,7 @@ class ArraySequence : public Sequence<T> {
         Sequence<T>* map(T (*func)(const T& elem)) override;
         Sequence<T>* where(bool (*predicate)(const T& elem)) override;
         T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
+        // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
 
         IEnumerator<T>* get_enumerator() const override {
             return array->get_enumerator();
@@ -111,6 +114,7 @@ class ListSequence : public Sequence<T> {
         Sequence<T>* map(T (*func)(const T& elem)) override;
         Sequence<T>* where(bool (*predicate)(const T& elem)) override;
         T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
+        // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
 
         IEnumerator<T>* get_enumerator() const override {
             return list->get_enumerator();

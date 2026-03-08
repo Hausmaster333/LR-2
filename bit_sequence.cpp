@@ -237,6 +237,24 @@ Bit BitSequence::reduce(Bit (*func)(const Bit& first_elem, const Bit& second_ele
     return reduced_elem;
 }
 
+// Sequence<Sequence<Bit>*>* BitSequence::split(bool (*predicate)(const Bit&)) {
+//     auto* sequences = new MutableArraySequence<Sequence<Bit>*>();
+//     BitSequence* current_seq = new BitSequence();
+
+//     for (int i = 0; i < bit_count; i++) {
+//         Bit b(get_bit(i));
+//         if (predicate(b)) {
+//             sequences->append(current_seq);
+//             current_seq = new BitSequence();
+//         } else {
+//             current_seq->append(b);
+//         }
+//     }
+//     sequences->append(current_seq);
+
+//     return sequences;
+// }
+
 BitSequence* BitSequence::bit_and(const BitSequence& other) const {
     int min_count = (bit_count < other.bit_count) ? bit_count : other.bit_count;
     int min_bytes = check_bytes_needed(min_count);
@@ -298,6 +316,6 @@ BitSequence* BitSequence::bit_not() const {
     for (int i = 0; i < bytes; i++) {
         not_bit_seq->data->set(i, ~data->get(i));
     }
-    
+
     return not_bit_seq;
 }

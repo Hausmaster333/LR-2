@@ -4,6 +4,41 @@
 #include <stdexcept>
 
 template <class T>
+Sequence<T>* Sequence<T>::slice(int index, int count, const Sequence<T>* replace_seq) {
+    int len = get_count();
+
+    if (index < 0) {
+        index = len + index;
+    }
+
+    if (index < 0 || index >= len) {
+        throw std::out_of_range("Slice index out of range");
+    }
+
+    if (count > len - index) {
+        count = len - index;
+    }
+
+    auto* sliced_seq = new MutableArraySequence<T>();
+
+    for (int i = 0; i < index; i++) {
+        sliced_seq->append(get(i));
+    }
+
+    if (replace_seq != nullptr) {
+        for (int i = 0; i < replace_seq->get_count(); i++) {
+            sliced_seq->append(replace_seq->get(i));
+        }
+    }
+
+    for (int i = index + count; i < len; i++) {
+        sliced_seq->append(get(i));
+    }
+
+    return sliced_seq;
+}
+
+template <class T>
 ArraySequence<T>::ArraySequence() : count(0) {
     array = new DynamicArray<T>();
 }
@@ -221,6 +256,27 @@ T ArraySequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem),
 
     return reduced_elem;
 }
+
+// template <class T>
+// Sequence<Sequence<T>*>* ArraySequence<T>::split(bool (*predicate)(const T&)) {
+//     auto* sequences = new MutableArraySequence<Sequence<T>*>();
+//     Sequence<T>* current_seq = EmptyClone();
+
+//     for (int i = 0; i < count; i++) {
+//         T current_elem = get(i);
+
+//         if (predicate(current_elem)) {
+//             sequences->append(current_seq);
+//             current_seq = EmptyClone();
+//         } else {
+//             current_seq->append(current_elem);
+//         }
+//     }
+//     sequences->append(current_seq);
+
+//     return sequences;
+// }
+
 // ==================================================
 
 template <class T>
@@ -396,3 +452,26 @@ T ListSequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), 
 
     return reduced_elem;
 }
+
+// template <class T>
+// Sequence<Sequence<T>*>* ListSequence<T>::split(bool (*predicate)(const T&)) {
+//     auto* sequences = new MutableListSequence<Sequence<T>*>();
+//     Sequence<T>* current_seq = EmptyClone();
+
+//     IEnumerator<T>* iter = get_enumerator();
+//     while (iter->move_next()) {
+//         T current_elem = iter->get_current();
+
+//         if (predicate(current_elem)) {
+//             sequences->append(current_seq);
+//             current_seq = EmptyClone();
+//         } else {
+//             current_seq->append(current_elem)
+//         }
+//     }
+//     delete iter;
+
+//     sequences->append(current_seq);
+
+//     return sequences;
+// }
