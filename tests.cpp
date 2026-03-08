@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
 #include "sequence.h"
+#include "bit_sequence.h"
+#include <gtest/gtest.h>
 
 int square(const int& x) {
     return x * x;
@@ -126,10 +127,11 @@ TEST(LinkedListTest, Iterator) {
     LinkedList<int> list(items, 3);
 
     int sum = 0;
-    for (auto curr = list.start(); curr != list.end(); ++curr) {
-        sum += *curr;
+    IEnumerator<int>* iter = list.get_enumerator();
+    while(iter->move_next()) {
+        sum += iter->get_current();
     }
-    
+
     EXPECT_EQ(sum, 6);
 }
 
@@ -577,9 +579,20 @@ TEST(BitTest, Operations) {
     EXPECT_EQ((~b).get(), true);
 }
 
+TEST(BitSequenceTest, ConstructFromArray) {
+    Bit items[] = {Bit(1), Bit(0), Bit(1), Bit(1)};
+    BitSequence seq(items, 4);
+
+    EXPECT_EQ(seq.get_count(), 4);
+    EXPECT_EQ(seq.get(0), Bit(1));
+    EXPECT_EQ(seq.get(1), Bit(0));
+    EXPECT_EQ(seq.get(2), Bit(1));
+    EXPECT_EQ(seq.get(3), Bit(1));
+}
+
 TEST(BitSequenceTest, BitAnd) {
-    BitSequence first(new MutableArraySequence<Bit>());
-    BitSequence second(new MutableListSequence<Bit>());
+    BitSequence first;
+    BitSequence second;
 
     first.append(Bit(1));
     first.append(Bit(0));
@@ -598,8 +611,8 @@ TEST(BitSequenceTest, BitAnd) {
 }
 
 TEST(BitSequenceTest, BitOr) {
-    BitSequence first(new MutableArraySequence<Bit>());
-    BitSequence second(new MutableListSequence<Bit>());
+    BitSequence first;
+    BitSequence second;
 
     first.append(Bit(1));
     first.append(Bit(0));
@@ -618,8 +631,8 @@ TEST(BitSequenceTest, BitOr) {
 }
 
 TEST(BitSequenceTest, BitXOR) {
-    BitSequence first(new MutableArraySequence<Bit>());
-    BitSequence second(new MutableListSequence<Bit>());
+    BitSequence first;
+    BitSequence second;
 
     first.append(Bit(1));
     first.append(Bit(0));
@@ -638,7 +651,7 @@ TEST(BitSequenceTest, BitXOR) {
 }
 
 TEST(BitSequenceTest, BitNot) {
-    BitSequence first(new MutableArraySequence<Bit>());
+    BitSequence first;
 
     first.append(Bit(1));
     first.append(Bit(0));

@@ -1,5 +1,6 @@
 #include "menu.h"
 #include "sequence.h"
+#include "bit_sequence.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -125,7 +126,7 @@ void menu_create_sequence() {
         int n;
         read_int(n);
 
-        BitSequence* bs = new BitSequence(new MutableArraySequence<Bit>());
+        BitSequence* bs = new BitSequence();
         for (int i = 0; i < n; i++) {
             std::cout << "Bit " << i << " (0/1): ";
             int val;

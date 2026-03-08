@@ -1,6 +1,8 @@
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 
+#include "ienumerator.h"
+
 template <class T>
 class LinkedList {
     private:
@@ -26,34 +28,42 @@ class LinkedList {
 
         LinkedList<T>* get_sub_list(int start, int end);
 
-        void append(T item); // В конец
-        void prepend(T item); // В начало
-        void insert_at(T item, int index);
+        void append(const T& item); // В конец
+        void prepend(const T& item); // В начало
+        void insert_at(const T& item, int index);
 
         LinkedList<T>* concat(const LinkedList<T>* other);
 
         ~LinkedList();
 
-        class Iterator {
+        class Enumerator : public IEnumerator<T> {
             private:
+                Node* head;
                 Node* current;
-            public:
-                Iterator(Node* node) : current(node) {}
+            public : 
+                Enumerator(Node* head) : head(head), current(nullptr) {}
 
-                const T& operator*() const { return current->data; }
-
-                Iterator& operator++() {
-                    current = current->next;
-                    return *this;
+                bool move_next() override {
+                    if (current == nullptr) {
+                        current = head;
+                    } else {
+                        current = current->next;
+                    }
+                    return current != nullptr;
                 }
 
-                bool operator!=(const Iterator& other) const {
-                    return current != other.current;
+                const T& get_current() const override {
+                    return current->data;
+                }
+
+                void reset() override {
+                    current = nullptr;
                 }
         };
 
-        Iterator start() const { return Iterator(head); }
-        Iterator end() const { return Iterator(nullptr); }
+        IEnumerator<T>* get_enumerator() const {
+            return new Enumerator(head);
+        }
 };
 
 #include "linked_list.tpp"

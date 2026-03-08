@@ -1,6 +1,8 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
+#include "ienumerator.h"
+
 template <class T>
 class DynamicArray {
     private:
@@ -18,33 +20,37 @@ class DynamicArray {
 
         int get_size() const;
 
-        void set(int index, T value);
+        void set(int index, const T& value);
 
         void resize(int newSize);
 
         ~DynamicArray();
 
-        // class Iterator {
-        //     private:
-        //         T* current;
-        //     public:
-        //         Iterator(T* ptr) : current(ptr) {}
+        class Enumerator : public IEnumerator<T> {
+            private:
+                T* data;
+                int size;
+                int index;
+            public : 
+                Enumerator(T* data, int size) : data(data), size(size), index(-1) {}
 
-        //         const T& operator*() const { return *current; }
+                bool move_next() override {
+                    index++;
+                    return index < size;
+                }
 
-        //         Iterator& operator++() {
-        //             current++;
-        //             return *this;
-        //         }
+                const T& get_current() const override {
+                    return data[index];
+                }
 
-        //         bool operator!=(const Iterator& other) const {
-        //             return current != other.current;
-        //         }
-        // };
+                void reset() override {
+                    index = -1;
+                }
+        };
 
-        // Iterator start() const { return Iterator(data); }
-        // Iterator end() const { return Iterator(data + size); }
-            
+        IEnumerator<T>* get_enumerator() const {
+            return new Enumerator(data, size);
+        }            
 };
 
 #include "dynamic_array.tpp"
