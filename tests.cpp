@@ -140,6 +140,7 @@ TEST(LinkedListTest, Iterator) {
     while(iter->move_next()) {
         sum += iter->get_current();
     }
+    delete iter;
 
     EXPECT_EQ(sum, 6);
 }
