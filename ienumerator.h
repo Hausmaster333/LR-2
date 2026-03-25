@@ -10,4 +10,31 @@ public:
     virtual ~IEnumerator() {}
 };
 
+template <class T>
+class EnumeratorWrapper {
+private:
+    IEnumerator<T>* iter;
+    bool has_current;
+public:
+    EnumeratorWrapper(IEnumerator<T>* iter) : iter(iter), has_current(false) {}
+
+    bool move_next() {
+        has_current = iter->move_next();
+        return has_current;
+    }
+
+    const T& get_current() const {
+        return iter->get_current();
+    }
+
+    void reset() {
+        iter->reset();
+        has_current = false;
+    }
+    
+    ~EnumeratorWrapper() {
+        delete iter;
+    }
+};
+
 #endif

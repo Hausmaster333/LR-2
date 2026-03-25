@@ -136,11 +136,10 @@ TEST(LinkedListTest, Iterator) {
     LinkedList<int> list(items, 3);
 
     int sum = 0;
-    IEnumerator<int>* iter = list.get_enumerator();
-    while(iter->move_next()) {
-        sum += iter->get_current();
+    EnumeratorWrapper<int> iter(list.get_enumerator());
+    while(iter.move_next()) {
+        sum += iter.get_current();
     }
-    delete iter;
 
     EXPECT_EQ(sum, 6);
 }

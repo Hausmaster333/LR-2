@@ -6,10 +6,10 @@
 
 class BitSequence : public Sequence<Bit> {
     private:
-        DynamicArray<unsigned char>* data;
+        DynamicArray<unsigned char> data;
         int bit_count;
         mutable Bit cached_bit; // Чтобы могли возвращаться const Bit&, т.к. биты упакованы по 8 бит в байт
-
+        
         bool get_bit(int index) const;
         void set_bit(int index, bool value);
 
@@ -73,9 +73,7 @@ class BitSequence : public Sequence<Bit> {
             return new Enumerator(this);
         }
 
-        ~BitSequence() override {
-            delete data;
-        };
+        ~BitSequence() override {};
 };
 
 
