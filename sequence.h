@@ -76,7 +76,7 @@ class ArraySequence : public Sequence<T> {
             return array.get_enumerator();
         }
 
-        ~ArraySequence() override {}
+        ~ArraySequence() {}
 };
 
 template <class T>
@@ -118,7 +118,7 @@ class ListSequence : public Sequence<T> {
             return list.get_enumerator();
         }
 
-        ~ListSequence() override {}
+        ~ListSequence() {}
 };
 
 template <class T>

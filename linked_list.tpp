@@ -51,9 +51,9 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
     tail = nullptr;
     length = 0;
 
-    IEnumerator<T>* other_iter = other.get_enumerator();
-    while (other_iter->move_next()) {
-        T curr_elem = other_iter->get_current();
+    EnumeratorWrapper<T> other_iter(other.get_enumerator());
+    while (other_iter.move_next()) {
+        T curr_elem = other_iter.get_current();
         append(curr_elem);
     }
 

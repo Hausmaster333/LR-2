@@ -353,6 +353,7 @@ Sequence<T>* ListSequence<T>::get_sub_sequence(int start, int end) {
     LinkedList<T>* sub_list_inside = list.get_sub_list(start, end);
 
     sub_list->list = *sub_list_inside;
+    delete sub_list_inside;
 
     return sub_list;
 }
