@@ -11,5 +11,9 @@ program: main.cpp menu.cpp
 tests: tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
 	$(CC) $(CFLAGS) $(GTEST_FLAGS) tests.cpp bit_sequence.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc -o tests
 
+tests_leak: tests.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc
+	$(CC) $(CFLAGS) -g $(GTEST_FLAGS) tests.cpp bit_sequence.cpp $(GTEST_DIR)/src/gtest-all.cc $(GTEST_DIR)/src/gtest_main.cc -o tests_leak
+#valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./tests_leak
+
 clean:
 	rm *.o program tests
