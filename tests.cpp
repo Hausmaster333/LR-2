@@ -1169,3 +1169,556 @@ TEST(SequencePolymorhTest, ArrayAndList) {
 }
 
 // =========================
+
+TEST(CRTPTest, MutableArrayClone) {
+    int items[] = {1, 2, 3};
+    MutableArraySequence<int> original(items, 3);
+
+    MutableArraySequence<int>* copy = original.Clone();
+
+    int expected[] = {1, 2, 3};
+    check_sequence(copy, expected, 3);
+
+    // Меняем копию — оригинал не затрагивается
+    copy->append(4);
+    EXPECT_EQ(original.get_count(), 3);
+    EXPECT_EQ(copy->get_count(), 4);
+
+    delete copy;
+}
+
+TEST(CRTPTest, MutableArrayEmpty) {
+    int items[] = {1, 2, 3};
+    MutableArraySequence<int> original(items, 3);
+
+    MutableArraySequence<int>* empty_arr = original.Empty();
+    EXPECT_EQ(empty_arr->get_count(), 0);
+
+    // Тип результата — именно MutableArraySequence, не абстрактный Sequence
+    empty_arr->append(99);
+    EXPECT_EQ(empty_arr->get_count(), 1);
+    EXPECT_EQ(empty_arr->get_first(), 99);
+
+    delete empty_arr;
+}
+
+TEST(CRTPTest, ImmutableArrayClone) {
+    int items[] = {10, 20, 30};
+    ImmutableArraySequence<int> original(items, 3);
+
+    ImmutableArraySequence<int>* copy = original.Clone();
+
+    int expected[] = {10, 20, 30};
+    check_sequence(copy, expected, 3);
+    EXPECT_EQ(copy->get_count(), 3);
+
+    delete copy;
+}
+
+TEST(CRTPTest, ImmutableArrayEmpty) {
+    int items[] = {1, 2, 3};
+    ImmutableArraySequence<int> original(items, 3);
+
+    ImmutableArraySequence<int>* empty_arr = original.Empty();
+    EXPECT_EQ(empty_arr->get_count(), 0);
+
+    delete empty_arr;
+}
+
+TEST(CRTPTest, MutableListClone) {
+    int items[] = {1, 2, 3};
+    MutableListSequence<int> original(items, 3);
+
+    MutableListSequence<int>* copy = original.Clone();
+
+    int expected[] = {1, 2, 3};
+    check_sequence(copy, expected, 3);
+
+    copy->append(4);
+    EXPECT_EQ(original.get_count(), 3);
+    EXPECT_EQ(copy->get_count(), 4);
+
+    delete copy;
+}
+
+TEST(CRTPTest, MutableListEmpty) {
+    int items[] = {1, 2, 3};
+    MutableListSequence<int> original(items, 3);
+
+    MutableListSequence<int>* empty_list = original.Empty();
+    EXPECT_EQ(empty_list->get_count(), 0);
+
+    empty_list->append(99);
+    EXPECT_EQ(empty_list->get_count(), 1);
+    EXPECT_EQ(empty_list->get_first(), 99);
+
+    delete empty_list;
+}
+
+TEST(CRTPTest, ImmutableListClone) {
+    int items[] = {10, 20, 30};
+    ImmutableListSequence<int> original(items, 3);
+
+    ImmutableListSequence<int>* copy = original.Clone();
+
+    int expected[] = {10, 20, 30};
+    check_sequence(copy, expected, 3);
+    EXPECT_EQ(copy->get_count(), 3);
+
+    delete copy;
+}
+
+TEST(CRTPTest, ImmutableListEmpty) {
+    int items[] = {1, 2, 3};
+    ImmutableListSequence<int> original(items, 3);
+
+    ImmutableListSequence<int>* empty_list = original.Empty();
+    EXPECT_EQ(empty_list->get_count(), 0);
+
+    delete empty_list;
+}
+
+TEST(CRTPTest, CloneReturnsDefinedType) {
+    MutableArraySequence<int> arr;
+    arr.append(1);
+
+    MutableArraySequence<int>* typed_copy = arr.Clone();
+    EXPECT_EQ(typed_copy->get_count(), 1);
+
+    delete typed_copy;
+}
+
+// =========================
+
+TEST(ZipTest, BasicZip) {
+    int a_items[] = {1, 2, 3};
+    double b_items[] = {1.1, 2.2, 3.3};
+
+    Sequence<int>* a = new MutableArraySequence<int>(a_items, 3);
+    Sequence<double>* b = new MutableArraySequence<double>(b_items, 3);
+
+    Sequence<Pair<int, double>>* zipped = zip(a, b);
+
+    EXPECT_EQ(zipped->get_count(), 3);
+    EXPECT_EQ(zipped->get_first().first(), 1);
+    EXPECT_EQ(zipped->get_first().second(), 1.1);
+    EXPECT_EQ(zipped->get_last().first(), 3);
+
+    delete zipped;
+    delete a;
+    delete b;
+}
+
+TEST(ZipTest, DifferentLengths) {
+    int a_items[] = {1, 2, 3, 4, 5};
+    int b_items[] = {10, 20};
+
+    Sequence<int>* a = new MutableArraySequence<int>(a_items, 5);
+    Sequence<int>* b = new MutableArraySequence<int>(b_items, 2);
+
+    Sequence<Pair<int, int>>* zipped = zip(a, b);
+
+    // Размер = минимум из двух
+    EXPECT_EQ(zipped->get_count(), 2);
+
+    delete zipped;
+    delete a;
+    delete b;
+}
+
+TEST(ZipTest, ZipUnzip) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {10, 20, 30};
+
+    Sequence<int>* a = new MutableArraySequence<int>(a_items, 3);
+    Sequence<int>* b = new MutableArraySequence<int>(b_items, 3);
+
+    Sequence<Pair<int, int>>* zipped = zip(a, b);
+    Pair<Sequence<int>*, Sequence<int>*> unzipped = unzip(zipped);
+
+    EXPECT_EQ(unzipped.first()->get_count(), 3);
+    EXPECT_EQ(unzipped.second()->get_count(), 3);
+    EXPECT_EQ(unzipped.first()->get_first(), 1);
+    EXPECT_EQ(unzipped.second()->get_first(), 10);
+
+    delete zipped;
+    delete unzipped.first();
+    delete unzipped.second();
+    delete a;
+    delete b;
+}
+
+// =========================
+
+TEST(Zip3Test, BasicZip3) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {10, 20, 30};
+    int c_items[] = {100, 200, 300};
+
+    Sequence<int>* a = new MutableArraySequence<int>(a_items, 3);
+    Sequence<int>* b = new MutableArraySequence<int>(b_items, 3);
+    Sequence<int>* c = new MutableArraySequence<int>(c_items, 3);
+
+    auto* zipped = zip3(a, b, c);
+
+    EXPECT_EQ(zipped->get_count(), 3);
+
+    const Triple<int, int, int>& first_triple = zipped->get_first();
+    EXPECT_EQ(first_triple.first(), 1);
+    EXPECT_EQ(first_triple.second(), 10);
+    EXPECT_EQ(first_triple.third(), 100);
+
+    const Triple<int, int, int>& last_triple = zipped->get_last();
+    EXPECT_EQ(last_triple.first(), 3);
+    EXPECT_EQ(last_triple.second(), 30);
+    EXPECT_EQ(last_triple.third(), 300);
+
+    delete zipped;
+    delete a;
+    delete b;
+    delete c;
+}
+
+TEST(Zip3Test, DifferentLengths) {
+    int a_items[] = {1, 2, 3, 4, 5};
+    int b_items[] = {10, 20};
+    int c_items[] = {100, 200, 300};
+
+    Sequence<int>* a = new MutableArraySequence<int>(a_items, 5);
+    Sequence<int>* b = new MutableArraySequence<int>(b_items, 2);
+    Sequence<int>* c = new MutableArraySequence<int>(c_items, 3);
+
+    auto* zipped = zip3(a, b, c);
+
+    EXPECT_EQ(zipped->get_count(), 2);
+
+    delete zipped;
+    delete a;
+    delete b;
+    delete c;
+}
+
+TEST(Zip3Test, Zip3Unzip3) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {10, 20, 30};
+    int c_items[] = {100, 200, 300};
+
+    Sequence<int>* a = new MutableArraySequence<int>(a_items, 3);
+    Sequence<int>* b = new MutableArraySequence<int>(b_items, 3);
+    Sequence<int>* c = new MutableArraySequence<int>(c_items, 3);
+
+    auto* zipped = zip3(a, b, c);
+    auto unzipped = unzip3(zipped);
+
+    EXPECT_EQ(unzipped.first()->get_count(), 3);
+    EXPECT_EQ(unzipped.second()->get_count(), 3);
+    EXPECT_EQ(unzipped.third()->get_count(), 3);
+
+    EXPECT_EQ(unzipped.first()->get_first(), 1);
+    EXPECT_EQ(unzipped.second()->get_first(), 10);
+    EXPECT_EQ(unzipped.third()->get_first(), 100);
+
+    delete zipped;
+    delete unzipped.first();
+    delete unzipped.second();
+    delete unzipped.third();
+    delete a;
+    delete b;
+    delete c;
+}
+
+TEST(Zip3Test, NullptrThrows) {
+    int items[] = {1, 2, 3};
+    Sequence<int>* a = new MutableArraySequence<int>(items, 3);
+
+    EXPECT_THROW((zip3<int, int, int>(nullptr, a, a)), std::invalid_argument);
+    EXPECT_THROW((zip3<int, int, int>(a, nullptr, a)), std::invalid_argument);
+    EXPECT_THROW((zip3<int, int, int>(a, a, nullptr)), std::invalid_argument);
+
+    delete a;
+}
+
+// ======================= map_define
+
+TEST(DefineTest, MapDefineMutableArray) {
+    int items[] = {1, -10, 3, 4, -5};
+    MutableArraySequence<int> arr(items, 5);
+
+    MutableArraySequence<int>* result = arr.map_defined(square);
+    int expected[] = {1, 100, 9, 16, 25};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+TEST(DefineTest, MapDefineImmutableArray) {
+    int items[] = {1, -10, 3, 4, -5};
+    ImmutableArraySequence<int> arr(items, 5);
+
+    ImmutableArraySequence<int>* result = arr.map_defined(square);
+    int expected[] = {1, 100, 9, 16, 25};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+TEST(DefineTest, MapDefineMutableList) {
+    int items[] = {1, -10, 3, 4, -5};
+    MutableListSequence<int> list(items, 5);
+
+    MutableListSequence<int>* result = list.map_defined(square);
+    int expected[] = {1, 100, 9, 16, 25};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+TEST(DefineTest, MapDefineImmutableList) {
+    int items[] = {1, -10, 3, 4, -5};
+    ImmutableListSequence<int> list(items, 5);
+
+    ImmutableListSequence<int>* result = list.map_defined(square);
+    int expected[] = {1, 100, 9, 16, 25};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+// ======================= where_define
+
+TEST(DefineTest, WhereDefineMutableArray) {
+    int items[] = {1, -10, 3, 4, -5};
+    MutableArraySequence<int> arr(items, 5);
+
+    MutableArraySequence<int>* result = arr.where_defined(is_positive);
+    int expected[] = {1, 3, 4};
+    check_sequence(result, expected, 3);
+
+    delete result;
+}
+
+TEST(DefineTest, WhereDefineImmutableArray) {
+    int items[] = {1, -10, 3, 4, -5};
+    ImmutableArraySequence<int> arr(items, 5);
+
+    ImmutableArraySequence<int>* result = arr.where_defined(is_positive);
+    int expected[] = {1, 3, 4};
+    check_sequence(result, expected, 3);
+
+    delete result;
+}
+
+TEST(DefineTest, WhereDefineMutableList) {
+    int items[] = {1, -10, 3, 4, -5};
+    MutableListSequence<int> list(items, 5);
+
+    MutableListSequence<int>* result = list.where_defined(is_positive);
+    int expected[] = {1, 3, 4};
+    check_sequence(result, expected, 3);
+
+    delete result;
+}
+
+TEST(DefineTest, WhereDefineImmutableList) {
+    int items[] = {1, -10, 3, 4, -5};
+    ImmutableListSequence<int> list(items, 5);
+
+    ImmutableListSequence<int>* result = list.where_defined(is_positive);
+    int expected[] = {1, 3, 4};
+    check_sequence(result, expected, 3);
+
+    delete result;
+}
+
+// ======================= concat_define
+
+TEST(DefineTest, ConcatDefineMutableArray) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {4, 5, 6};
+
+    MutableArraySequence<int> a(a_items, 3);
+    MutableArraySequence<int> b(b_items, 3);
+
+    MutableArraySequence<int>* result = a.concat_defined(&b);
+    int expected[] = {1, 2, 3, 4, 5, 6};
+    check_sequence(result, expected, 6);
+
+    delete result;
+}
+
+TEST(DefineTest, ConcatDefineImmutableArray) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {4, 5, 6};
+
+    ImmutableArraySequence<int> a(a_items, 3);
+    ImmutableArraySequence<int> b(b_items, 3);
+
+    ImmutableArraySequence<int>* result = a.concat_defined(&b);
+    int expected[] = {1, 2, 3, 4, 5, 6};
+    check_sequence(result, expected, 6);
+
+    delete result;
+}
+
+TEST(DefineTest, ConcatDefineMutableList) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {4, 5, 6};
+
+    MutableListSequence<int> a(a_items, 3);
+    MutableListSequence<int> b(b_items, 3);
+
+    MutableListSequence<int>* result = a.concat_defined(&b);
+    int expected[] = {1, 2, 3, 4, 5, 6};
+    check_sequence(result, expected, 6);
+
+    delete result;
+}
+
+TEST(DefineTest, ConcatDefineImmutableList) {
+    int a_items[] = {1, 2, 3};
+    int b_items[] = {4, 5, 6};
+
+    ImmutableListSequence<int> a(a_items, 3);
+    ImmutableListSequence<int> b(b_items, 3);
+
+    ImmutableListSequence<int>* result = a.concat_defined(&b);
+    int expected[] = {1, 2, 3, 4, 5, 6};
+    check_sequence(result, expected, 6);
+
+    delete result;
+}
+
+// ======================= slice_define
+
+
+TEST(DefineTest, SliceDefineMutableArray) {
+    int items[] = {1, 2, 3, 4, 5};
+    MutableArraySequence<int> arr(items, 5);
+
+    int rep_items[] = {9, 10};
+    MutableArraySequence<int> replacement(rep_items, 2);
+
+    MutableArraySequence<int>* result = arr.slice_defined(1, 2, &replacement);
+    int expected[] = {1, 9, 10, 4, 5};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+TEST(DefineTest, SliceDefineImmutableArray) {
+    int items[] = {1, 2, 3, 4, 5};
+    ImmutableArraySequence<int> arr(items, 5);
+
+    int rep_items[] = {9, 10};
+    ImmutableArraySequence<int> replacement(rep_items, 2);
+
+    ImmutableArraySequence<int>* result = arr.slice_defined(1, 2, &replacement);
+    int expected[] = {1, 9, 10, 4, 5};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+TEST(DefineTest, SliceDefineMutableList) {
+    int items[] = {1, 2, 3, 4, 5};
+    MutableListSequence<int> list(items, 5);
+
+    int rep_items[] = {9, 10};
+    MutableListSequence<int> replacement(rep_items, 2);
+
+    MutableListSequence<int>* result = list.slice_defined(1, 2, &replacement);
+    int expected[] = {1, 9, 10, 4, 5};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+TEST(DefineTest, SliceDefineImmutableList) {
+    int items[] = {1, 2, 3, 4, 5};
+    ImmutableListSequence<int> list(items, 5);
+
+    int rep_items[] = {9, 10};
+    ImmutableListSequence<int> replacement(rep_items, 2);
+
+    ImmutableListSequence<int>* result = list.slice_defined(1, 2, &replacement);
+    int expected[] = {1, 9, 10, 4, 5};
+    check_sequence(result, expected, 5);
+
+    delete result;
+}
+
+// ======================= chain_append
+
+TEST(ChainTest, ChainAppendMutableArray) {
+    MutableArraySequence<int> seq;
+    seq.chain_append(1).chain_append(2).chain_append(3);
+
+    int expected[] = {1, 2, 3};
+    check_sequence(&seq, expected, 3);
+}
+
+TEST(ChainTest, ChainAppendMutableList) {
+    MutableListSequence<int> list;
+    list.chain_append(10).chain_append(20).chain_append(30);
+
+    int expected[] = {10, 20, 30};
+    check_sequence(&list, expected, 3);
+}
+
+// ======================= chain_prepend
+
+TEST(ChainTest, ChainPrependMutableArray) {
+    MutableArraySequence<int> seq;
+    seq.chain_prepend(3).chain_prepend(2).chain_prepend(1);
+
+    int expected[] = {1, 2, 3};
+    check_sequence(&seq, expected, 3);
+}
+
+TEST(ChainTest, ChainPrependMutableList) {
+    MutableListSequence<int> list;
+    list.chain_prepend(30).chain_prepend(20).chain_prepend(10);
+
+    int expected[] = {10, 20, 30};
+    check_sequence(&list, expected, 3);
+}
+
+// ======================= chain_insert_at
+
+TEST(ChainTest, ChainInsertAtMutableArray) {
+    int items[] = {1, 5};
+    MutableArraySequence<int> seq(items, 2);
+
+    seq.chain_insert_at(2, 1).chain_insert_at(3, 2).chain_insert_at(4, 3);
+
+    int expected[] = {1, 2, 3, 4, 5};
+    check_sequence(&seq, expected, 5);
+}
+
+TEST(ChainTest, ChainInsertAtMutableList) {
+    int items[] = {1, 5};
+    MutableListSequence<int> list(items, 2);
+
+    list.chain_insert_at(2, 1).chain_insert_at(3, 2).chain_insert_at(4, 3);
+
+    int expected[] = {1, 2, 3, 4, 5};
+    check_sequence(&list, expected, 5);
+}
+
+// ======================= Смешанные цепочки
+
+TEST(ChainTest, MixedChainMutableArray) {
+    MutableArraySequence<int> seq;
+    seq.chain_append(2).chain_append(3).chain_prepend(1).chain_insert_at(4, 3);
+
+    int expected[] = {1, 2, 3, 4};
+    check_sequence(&seq, expected, 4);
+}
+
+TEST(ChainTest, MixedChainMutableList) {
+    MutableListSequence<int> list;
+    list.chain_append(20).chain_append(30).chain_prepend(10).chain_insert_at(40, 3);
+
+    int expected[] = {10, 20, 30, 40};
+    check_sequence(&list, expected, 4);
+}
