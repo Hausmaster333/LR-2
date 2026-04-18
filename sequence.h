@@ -7,14 +7,15 @@
 
 template <class T>
 class Sequence {
+    protected:
+        virtual void sys_append(const T& item) = 0;
+        virtual Sequence<T>* sys_empty_clone() const = 0;
     public:
         virtual const T& get_first() const = 0; // const T& ссылка, чтобы не копировать объект, а просто const запрещает менять значение через эту ссылку
         virtual const T& get_last() const = 0;
-        virtual const T& get(int index) const = 0;
 
         virtual Option<T> try_get_first() const = 0;
         virtual Option<T> try_get_last() const = 0;
-        virtual Option<T> try_get(int index) const = 0;
 
         virtual int get_count() const = 0;
 
@@ -24,12 +25,12 @@ class Sequence {
         virtual Sequence<T>* prepend(const T& item) = 0;
         virtual Sequence<T>* insert_at(const T& item, int index) = 0;
 
-        virtual Sequence<T>* concat(const Sequence<T>* other) = 0;
-        virtual Sequence<T>* map(T (*func)(const T& elem)) = 0;
-        virtual Sequence<T>* where(bool (*predicate)(const T& elem)) = 0;
-        virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) = 0;
+        virtual Sequence<T>* concat(const Sequence<T>* other) const;
+        virtual Sequence<T>* map(T (*func)(const T& elem)) const;
+        virtual Sequence<T>* where(bool (*predicate)(const T& elem)) const;
+        virtual T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) const;
 
-        virtual Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
+        virtual Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr) const;
 
         virtual IEnumerator<T>* get_enumerator() const = 0;
 
@@ -41,6 +42,9 @@ class ArraySequence : public Sequence<T> {
     protected:    
         DynamicArray<T> array;
         int count;
+
+        void sys_append(const T& item) override;
+        Sequence<T>* sys_empty_clone() const override;
     public:
         ArraySequence();
         ArraySequence(const T* items, int count); // const items
@@ -48,15 +52,15 @@ class ArraySequence : public Sequence<T> {
         ArraySequence(const ArraySequence<T>& other);
 
         virtual ArraySequence<T>* Instance() = 0;
-        virtual ArraySequence<T>* EmptyClone() = 0;
+        virtual ArraySequence<T>* EmptyClone() const = 0;
 
         const T& get_first() const override;
         const T& get_last() const override;
-        const T& get(int index) const override;
+        const T& get(int index) const;
 
         Option<T> try_get_first() const override;
         Option<T> try_get_last() const override;
-        Option<T> try_get(int index) const override;
+        Option<T> try_get(int index) const;
 
         int get_count() const override;
 
@@ -66,14 +70,14 @@ class ArraySequence : public Sequence<T> {
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;
 
-        Sequence<T>* concat(const Sequence<T>* other) override;
-        Sequence<T>* map(T (*func)(const T& elem)) override;
-        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
-        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
+        // Sequence<T>* concat(const Sequence<T>* other) override;
+        // Sequence<T>* map(T (*func)(const T& elem)) override;
+        // Sequence<T>* where(bool (*predicate)(const T& elem)) override;
+        // T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
         // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
 
         IEnumerator<T>* get_enumerator() const override {
-            return array.get_enumerator();
+            return array.get_enumerator(count);
         }
 
         ~ArraySequence() {}
@@ -83,6 +87,9 @@ template <class T>
 class ListSequence : public Sequence<T> {
     protected:    
         LinkedList<T> list;
+
+        void sys_append(const T& item) override;
+        Sequence<T>* sys_empty_clone() const override;
     public:
         ListSequence();
         ListSequence(const T* items, int count);
@@ -90,15 +97,15 @@ class ListSequence : public Sequence<T> {
         ListSequence(const ListSequence<T>& other);
 
         virtual ListSequence<T>* Instance() = 0;
-        virtual ListSequence<T>* EmptyClone() = 0;
+        virtual ListSequence<T>* EmptyClone() const = 0;
 
         const T& get_first() const override;
         const T& get_last() const override;
-        const T& get(int index) const override;
+        // const T& get(int index) const override;
 
         Option<T> try_get_first() const override;
         Option<T> try_get_last() const override;
-        Option<T> try_get(int index) const override;
+        // Option<T> try_get(int index) const override;
 
         int get_count() const override;
 
@@ -108,10 +115,10 @@ class ListSequence : public Sequence<T> {
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;
 
-        Sequence<T>* concat(const Sequence<T>* other) override;
-        Sequence<T>* map(T (*func)(const T& elem)) override;
-        Sequence<T>* where(bool (*predicate)(const T& elem)) override;
-        T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
+        // Sequence<T>* concat(const Sequence<T>* other) override;
+        // Sequence<T>* map(T (*func)(const T& elem)) override;
+        // Sequence<T>* where(bool (*predicate)(const T& elem)) override;
+        // T reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) override;
         // Sequence<T>* slice(int index, int count, const Sequence<T>* replace_seq = nullptr);
 
         IEnumerator<T>* get_enumerator() const override {
@@ -128,7 +135,7 @@ class MutableArraySequence : public ArraySequence<T> {
             return this; // Возвращаем исходный объект
         };
 
-        ArraySequence<T>* EmptyClone() override {
+        ArraySequence<T>* EmptyClone() const override {
             return new MutableArraySequence<T>();
         };
 
@@ -146,7 +153,7 @@ class ImmutableArraySequence : public ArraySequence<T> {
             return new ImmutableArraySequence<T>(*this); // Возвращаем копию(получаем объект -> отдаем по ссылке)
         };
         
-        ArraySequence<T>* EmptyClone() override {
+        ArraySequence<T>* EmptyClone() const override {
             return new ImmutableArraySequence<T>();
         };
 
@@ -164,7 +171,7 @@ class MutableListSequence : public ListSequence<T> {
             return this; // Возвращаем исходный объект
         };
 
-        ListSequence<T>* EmptyClone() override {
+        ListSequence<T>* EmptyClone() const override {
             return new MutableListSequence<T>();
         };
 
@@ -182,7 +189,7 @@ class ImmutableListSequence : public ListSequence<T> {
             return new ImmutableListSequence<T>(*this); // Возвращаем копию(получаем объект -> отдаем по ссылке)
         };
 
-        ListSequence<T>* EmptyClone() override {
+        ListSequence<T>* EmptyClone() const override {
             return new ImmutableListSequence<T>();
         };
         

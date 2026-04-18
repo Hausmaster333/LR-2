@@ -45,18 +45,28 @@ bool is_zero(const int& x) {
 
 void print_sequence(Sequence<int>* seq) {
     std::cout << "[";
-    for (int i = 0; i < seq->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << seq->get(i);
+
+    EnumeratorWrapper<int> iter(seq->get_enumerator());
+
+    bool is_first = true;
+    while (iter.move_next()) {
+        if (!is_first) std::cout << ", ";
+        std::cout << iter.get_current();
+        is_first = false;
     }
     std::cout << "]" << std::endl;
 }
 
 void print_bit_sequence(BitSequence* seq) {
     std::cout << "[";
-    for (int i = 0; i < seq->get_count(); i++) {
-        if (i > 0) std::cout << ", ";
-        std::cout << seq->get(i).get();
+
+    EnumeratorWrapper<Bit> iter(seq->get_enumerator());
+
+    bool is_first = true;
+    while(iter.move_next()) {
+        if (!is_first) std::cout << ", ";
+        std::cout << iter.get_current().get();
+        is_first = false;
     }
     std::cout << "]" << std::endl;
 }
@@ -227,10 +237,19 @@ void menu_get_element() {
     int pos;
     read_int(pos);
 
-    try {
-        std::cout << "Element: " << sequences[index]->get(pos) << std::endl;
-    } catch (const std::out_of_range& e) {
-        std::cout << "Error: " << e.what() << std::endl;
+    if (pos < 0 || pos >= sequences[index]->get_count()) {
+        std::cout << "Index out of range" << std::endl;
+        return;
+    }
+
+    EnumeratorWrapper<int> iter(sequences[index]->get_enumerator());
+    int i = 0;
+    while (iter.move_next()) {
+        if (i == pos) {
+            std::cout << "Element: " << iter.get_current() << std::endl;
+            return;
+        }
+        i++;
     }
 }
 
@@ -395,13 +414,17 @@ void menu_split() {
     auto* result = split(sequences[index], is_zero);
 
     std::cout << "Split into " << result->get_count() << " fragments:" << std::endl;
-    for (int i = 0; i < result->get_count(); i++) {
-        std::cout << "  [" << i << "]: ";
-        print_sequence(result->get(i));
-    }
 
-    for (int i = 0; i < result->get_count(); i++) {
-        delete result->get(i);
+    EnumeratorWrapper<Sequence<int>*> iter(result->get_enumerator());
+    int i = 0;
+    while (iter.move_next()) {
+        Sequence<int>* fragment = iter.get_current();
+        std::cout << "  [" << i << "]: ";
+
+        print_sequence(iter.get_current());
+
+        delete fragment;
+        i++;
     }
     delete result;
 }
@@ -456,7 +479,7 @@ void menu_slice() {
 
 void menu_run_tests() {
     std::cout << "\nRunning tests..." << std::endl;
-    int ret = system("make tests && ./tests");
+    int ret = system("tests");
     if (ret != 0) {
         std::cout << "Error running tests" << std::endl;
     }

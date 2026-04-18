@@ -8,12 +8,13 @@ Sequence<Sequence<T>*>* split(const Sequence<T>* seq, bool (*predicate)(const T&
     auto* sequences = new MutableArraySequence<Sequence<T>*>();
     auto* current_seq = new MutableArraySequence<T>();
 
-    for (int i = 0; i < seq->get_count(); i++) {
-        if (predicate(seq->get(i))) {
+    EnumeratorWrapper<T> iter(seq->get_enumerator());
+    while (iter.move_next()) {
+        if (predicate(iter.get_current())) {
             sequences->append(current_seq);
             current_seq = new MutableArraySequence<T>();
         } else {
-            current_seq->append(seq->get(i));
+            current_seq->append(iter.get_current());
         }
     }
 

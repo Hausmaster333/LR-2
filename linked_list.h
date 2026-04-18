@@ -23,7 +23,6 @@ class LinkedList {
 
         const T& get_first() const;
         const T& get_last() const;
-        const T& get(int index) const; // Лучше использовать Iterator
         int get_length() const;
 
         LinkedList<T>* get_sub_list(int start, int end);

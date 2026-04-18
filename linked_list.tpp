@@ -71,21 +71,22 @@ const T& LinkedList<T>::get_first() const {
 
 template <class T>
 const T& LinkedList<T>::get_last() const {
+    if (length == 0) throw std::out_of_range("List is empty");
     return tail->data;
 }
 
-template <class T>
-const T& LinkedList<T>::get(int index) const {
-    if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
+// template <class T>
+// const T& LinkedList<T>::get(int index) const {
+//     if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
 
-    Node* current = head;
+//     Node* current = head;
 
-    for (int i = 0; i < index; i++) {
-        current = current->next;
-    }
+//     for (int i = 0; i < index; i++) {
+//         current = current->next;
+//     }
 
-    return current->data;
-}
+//     return current->data;
+// }
 
 template <class T>
 int LinkedList<T>::get_length() const {

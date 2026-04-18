@@ -26,6 +26,23 @@ void BitSequence::set_bit(int index, bool value) {
     data.set(byte_index, byte);
 }
 
+void BitSequence::sys_append(const Bit& item) {
+    int new_count = bit_count + 1;
+    int new_bytes = check_bytes_needed(new_count);
+
+    if (new_bytes > data.get_size()) {
+        data.resize(new_bytes);
+        data.set(new_bytes - 1, 0);
+    }
+
+    bit_count = new_count;
+    set_bit(bit_count - 1, item.get());
+}
+
+Sequence<Bit>* BitSequence::sys_empty_clone() const {
+    return new BitSequence();
+}
+
 BitSequence::BitSequence() : bit_count(0), cached_bit(false) {
     data = DynamicArray<unsigned char>(0);
 }
@@ -191,49 +208,51 @@ Sequence<Bit>* BitSequence::insert_at(const Bit& item, int index) {
     return this;
 }
 
-Sequence<Bit>* BitSequence::concat(const Sequence<Bit>* other) {
-    for (int i = 0; i < other->get_count(); i++) {
-        append(other->get(i));
-    }
+// Sequence<Bit>* BitSequence::concat(const Sequence<Bit>* other) {
+//     EnumeratorWrapper<Bit> other_iter(other->get_enumerator());
+    
+//     while (other_iter.move_next()) {
+//         append(other_iter.get_current());
+//     }
 
-    return this;
-}
+//     return this;
+// }
 
-Sequence<Bit>* BitSequence::map(Bit (*func)(const Bit& elem)) {
-    BitSequence* mapped_bit = new BitSequence();
+// Sequence<Bit>* BitSequence::map(Bit (*func)(const Bit& elem)) {
+//     BitSequence* mapped_bit = new BitSequence();
 
-    for (int i = 0; i < bit_count; i++) {
-        Bit current_elem(get_bit(i));
-        mapped_bit->append(func(current_elem));
-    }
+//     for (int i = 0; i < bit_count; i++) {
+//         Bit current_elem(get_bit(i));
+//         mapped_bit->append(func(current_elem));
+//     }
 
-    return mapped_bit;
-}
+//     return mapped_bit;
+// }
 
-Sequence<Bit>* BitSequence::where(bool (*predicate)(const Bit& elem)) {
-    BitSequence* where_bit = new BitSequence();
+// Sequence<Bit>* BitSequence::where(bool (*predicate)(const Bit& elem)) {
+//     BitSequence* where_bit = new BitSequence();
 
-    for (int i = 0; i < bit_count; i++) {
-        Bit current_elem(get_bit(i));
+//     for (int i = 0; i < bit_count; i++) {
+//         Bit current_elem(get_bit(i));
 
-        if (predicate(current_elem)) {
-            where_bit->append(current_elem);
-        }
-    }
+//         if (predicate(current_elem)) {
+//             where_bit->append(current_elem);
+//         }
+//     }
 
-    return where_bit;
-}
+//     return where_bit;
+// }
 
-Bit BitSequence::reduce(Bit (*func)(const Bit& first_elem, const Bit& second_elem), const Bit& initial_elem) {
-    Bit reduced_elem = initial_elem;
+// Bit BitSequence::reduce(Bit (*func)(const Bit& first_elem, const Bit& second_elem), const Bit& initial_elem) {
+//     Bit reduced_elem = initial_elem;
 
-    for (int i = 0; i < bit_count; i++) {
-        Bit current_elem(get_bit(i));
-        reduced_elem = func(reduced_elem, current_elem);
-    }
+//     for (int i = 0; i < bit_count; i++) {
+//         Bit current_elem(get_bit(i));
+//         reduced_elem = func(reduced_elem, current_elem);
+//     }
 
-    return reduced_elem;
-}
+//     return reduced_elem;
+// }
 
 // Sequence<Sequence<Bit>*>* BitSequence::split(bool (*predicate)(const Bit&)) {
 //     auto* sequences = new MutableArraySequence<Sequence<Bit>*>();
