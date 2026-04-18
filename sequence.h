@@ -45,14 +45,14 @@ class ArraySequence : public Sequence<T> {
 
         void sys_append(const T& item) override;
         Sequence<T>* sys_empty_clone() const override;
+
+        virtual ArraySequence<T>* Instance() = 0;
+        virtual ArraySequence<T>* EmptyClone() const = 0;        
     public:
         ArraySequence();
         ArraySequence(const T* items, int count); // const items
         ArraySequence(const DynamicArray<T>& other);
         ArraySequence(const ArraySequence<T>& other);
-
-        virtual ArraySequence<T>* Instance() = 0;
-        virtual ArraySequence<T>* EmptyClone() const = 0;
 
         const T& get_first() const override;
         const T& get_last() const override;
@@ -84,14 +84,14 @@ class ListSequence : public Sequence<T> {
 
         void sys_append(const T& item) override;
         Sequence<T>* sys_empty_clone() const override;
+
+        virtual ListSequence<T>* Instance() = 0;
+        virtual ListSequence<T>* EmptyClone() const = 0;        
     public:
         ListSequence();
         ListSequence(const T* items, int count);
         ListSequence(const LinkedList<T>& other);
         ListSequence(const ListSequence<T>& other);
-
-        virtual ListSequence<T>* Instance() = 0;
-        virtual ListSequence<T>* EmptyClone() const = 0;
 
         const T& get_first() const override;
         const T& get_last() const override;
