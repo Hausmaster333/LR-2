@@ -62,11 +62,7 @@ Pair<Sequence<T1>*, Sequence<T2>*> unzip(const Sequence<Pair<T1, T2>>* seq) {
 }
 
 template <class T1, class T2, class T3>
-Sequence<Triple<T1, T2, T3>>* zip3(
-    const Sequence<T1>* a, 
-    const Sequence<T2>* b, 
-    const Sequence<T3>* c
-) {
+Sequence<Triple<T1, T2, T3>>* zip3(const Sequence<T1>* a, const Sequence<T2>* b, const Sequence<T3>* c) {
     if (a == nullptr || b == nullptr || c == nullptr) {
         throw std::invalid_argument("Cannot zip3 with nullptr");
     }
@@ -89,9 +85,7 @@ Sequence<Triple<T1, T2, T3>>* zip3(
 }
 
 template <class T1, class T2, class T3>
-Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip3(
-    const Sequence<Triple<T1, T2, T3>>* seq
-) {
+Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip3(const Sequence<Triple<T1, T2, T3>>* seq) {
     if (seq == nullptr) {
         throw std::invalid_argument("Cannot unzip3 nullptr");
     }
@@ -103,14 +97,13 @@ Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*> unzip3(
     EnumeratorWrapper<Triple<T1, T2, T3>> iter(seq->get_enumerator());
     while (iter.move_next()) {
         const Triple<T1, T2, T3>& t = iter.get_current();
+
         first_seq->append(t.first());
         second_seq->append(t.second());
         third_seq->append(t.third());
     }
 
-    return Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*>(
-        first_seq, second_seq, third_seq
-    );
+    return Triple<Sequence<T1>*, Sequence<T2>*, Sequence<T3>*>(first_seq, second_seq, third_seq);
 }
 
 #endif
