@@ -74,11 +74,7 @@ Sequence<Triple<T1, T2, T3>>* zip3(const Sequence<T1>* a, const Sequence<T2>* b,
     EnumeratorWrapper<T3> c_iter(c->get_enumerator());
 
     while (a_iter.move_next() && b_iter.move_next() && c_iter.move_next()) {
-        result->append(Triple<T1, T2, T3>(
-            a_iter.get_current(),
-            b_iter.get_current(),
-            c_iter.get_current()
-        ));
+        result->append(Triple<T1, T2, T3>(a_iter.get_current(), b_iter.get_current(), c_iter.get_current()));
     }
 
     return result;
