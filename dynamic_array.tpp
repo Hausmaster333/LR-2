@@ -8,15 +8,19 @@ DynamicArray<T>::DynamicArray() : size(0) {
 
 template <class T>
 DynamicArray<T>::DynamicArray(int size): size(size) {
+    if (size < 0) throw std::out_of_range("Size must be >= 0");
+
     data = new T[size];
 }
 
 template <class T>
 DynamicArray<T>::DynamicArray(const T* items, int count): size(count) {
+    if (size < 0) throw std::out_of_range("Size must be >= 0");
+
     data = new T[size];
 
-    for (int i = 0; i < size; i++) {
-        data[i] = items[i];
+    for (int curr_idx = 0; curr_idx < size; curr_idx++) {
+        data[curr_idx] = items[curr_idx];
     }
 }
 
@@ -24,8 +28,8 @@ template <class T>
 DynamicArray<T>::DynamicArray(const DynamicArray<T>& other): size(other.size) {
     data = new T[size];
 
-    for (int i = 0; i < size; i++) {
-        data[i] = other.data[i];
+    for (int curr_idx = 0; curr_idx < size; curr_idx++) {
+        data[curr_idx] = other.data[curr_idx];
     }
 }
 
@@ -37,8 +41,8 @@ DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& other) {
     size = other.size;
     data = new T[size];
 
-    for (int i = 0; i < size; i++) {
-        data[i] = other.data[i];
+    for (int curr_idx = 0; curr_idx < size; curr_idx++) {
+        data[curr_idx] = other.data[curr_idx];
     }
 
     return *this;
@@ -67,18 +71,20 @@ void DynamicArray<T>::set(int index, const T& value) {
 }
 
 template <class T>
-void DynamicArray<T>::resize(int newSize) {
-    T* newData = new T[newSize];
+void DynamicArray<T>::resize(int new_size) {
+    if (new_size < 0) throw std::out_of_range("Size must be >= 0");
 
-    int mainSize = (newSize < size) ?  newSize : size;
+    T* new_data = new T[new_size];
 
-    for (int i = 0; i < mainSize; i++) {
-        newData[i] = data[i];
+    int mainSize = (new_size < size) ?  new_size : size;
+
+    for (int curr_idx = 0; curr_idx < mainSize; curr_idx++) {
+        new_data[curr_idx] = data[curr_idx];
     }
 
     delete[] data;
-    data = newData;
-    size = newSize;
+    data = new_data;
+    size = new_size;
 }
 
 template <class T>

@@ -8,10 +8,10 @@ void check_sequence(const Sequence<T>* seq, const T* expected, int expected_coun
     EXPECT_EQ(seq->get_count(), expected_count);
     
     EnumeratorWrapper<T> iter(seq->get_enumerator());
-    int i = 0;
+    int curr_idx = 0;
     while (iter.move_next()) {
-        EXPECT_EQ(iter.get_current(), expected[i]);
-        i++;
+        EXPECT_EQ(iter.get_current(), expected[curr_idx]);
+        curr_idx++;
     }
 }
 
@@ -20,10 +20,10 @@ void check_linked_list(const LinkedList<T>& list, const T* expected, int expecte
     EXPECT_EQ(list.get_length(), expected_count);
 
     EnumeratorWrapper<T> iter(list.get_enumerator());
-    int i = 0;
+    int curr_idx = 0;
     while (iter.move_next()) {
-        EXPECT_EQ(iter.get_current(), expected[i]);
-        i++;
+        EXPECT_EQ(iter.get_current(), expected[curr_idx]);
+        curr_idx++;
     }
 }
 
@@ -872,6 +872,7 @@ TEST(SplitTest, MutableArrayBasic) {
     int fragment_index = 0;
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
+
         if (fragment_index == 0) {
             int expected[] = {1, 2};
             check_sequence(fragment, expected, 2);
@@ -882,6 +883,7 @@ TEST(SplitTest, MutableArrayBasic) {
             int expected[] = {5};
             check_sequence(fragment, expected, 1);
         }
+
         delete fragment;
         fragment_index++;
     }
@@ -902,6 +904,7 @@ TEST(SplitTest, MutableListBasic) {
     int fragment_index = 0;
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
+
         EXPECT_EQ(fragment->get_count(), (fragment_index == 2) ? 1 : 2);
         delete fragment;
         fragment_index++;
@@ -923,12 +926,14 @@ TEST(SplitTest, DelimiterAtStart) {
     int fragment_index = 0;
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
+
         if (fragment_index == 0) {
             EXPECT_EQ(fragment->get_count(), 0);
         } else if (fragment_index == 1) {
             int expected[] = {1, 2, 3};
             check_sequence(fragment, expected, 3);
         }
+
         delete fragment;
         fragment_index++;
     }
@@ -949,12 +954,14 @@ TEST(SplitTest, DelimiterAtEnd) {
     int fragment_index = 0;
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
+
         if (fragment_index == 0) {
             int expected[] = {1, 2, 3};
             check_sequence(fragment, expected, 3);
         } else if (fragment_index == 1) {
             EXPECT_EQ(fragment->get_count(), 0);
         }
+
         delete fragment;
         fragment_index++;
     }
@@ -974,6 +981,7 @@ TEST(SplitTest, NoDelimiter) {
     EnumeratorWrapper<Sequence<int>*> iter(split_seq->get_enumerator());
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
+
         int expected[] = {1, 2, 3};
         check_sequence(fragment, expected, 3);
         delete fragment;
@@ -993,6 +1001,7 @@ TEST(SplitTest, EmptySequence) {
     EnumeratorWrapper<Sequence<int>*> iter(split_seq->get_enumerator());
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
+
         EXPECT_EQ(fragment->get_count(), 0);
         delete fragment;
     }
@@ -1018,6 +1027,7 @@ TEST(SplitTest, BitSequenceSplit) {
     int fragment_index = 0;
     while (iter.move_next()) {
         Sequence<Bit>* fragment = iter.get_current();
+
         if (fragment_index == 0) {
             Bit expected[] = {Bit(1)};
             check_sequence(fragment, expected, 1);
@@ -1028,6 +1038,7 @@ TEST(SplitTest, BitSequenceSplit) {
             Bit expected[] = {Bit(1)};
             check_sequence(fragment, expected, 1);
         }
+
         delete fragment;
         fragment_index++;
     }

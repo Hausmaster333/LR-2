@@ -19,7 +19,7 @@ class Sequence {
 
         virtual int get_count() const = 0;
 
-        virtual Sequence<T>* get_sub_sequence(int start, int end) = 0;
+        virtual Sequence<T>* get_sub_sequence(int start, int end) const;
 
         virtual Sequence<T>* append(const T& item) = 0;
         virtual Sequence<T>* prepend(const T& item) = 0;
@@ -64,8 +64,6 @@ class ArraySequence : public Sequence<T> {
 
         int get_count() const override;
 
-        Sequence<T>* get_sub_sequence(int start, int end) override;
-
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
         Sequence<T>* insert_at(const T& item, int index) override;;
@@ -100,8 +98,6 @@ class ListSequence : public Sequence<T> {
         Option<T> try_get_last() const override;
 
         int get_count() const override;
-
-        Sequence<T>* get_sub_sequence(int start, int end) override;
 
         Sequence<T>* append(const T& item) override;
         Sequence<T>* prepend(const T& item) override;
@@ -149,6 +145,10 @@ class SequenceCRTP : public Base<T> {
 
         Derived* concat_defined(const Sequence<T>* other) const {
             return static_cast<Derived*>(this->concat(other));
+        }
+
+        Derived* get_sub_sequence_defined(int start, int end) const {
+            return static_cast<Derived*>(this->get_sub_sequence(start, end));
         }
 
         Derived* slice_defined(int index, int count, const Sequence<T>* replace_seq = nullptr) const {

@@ -73,14 +73,18 @@ void print_bit_sequence(BitSequence* seq) {
 
 int select_sequence(const char* value) {
     if (seq_count == 0) {
-        std::cout << "No sequences created" << std::endl;
+        if (bit_seq_count > 0) {
+            std::cout << "This operation is available only for Sequence<int>" << std::endl;
+        } else {
+            std::cout << "No sequences created" << std::endl;
+        }
         return -1;
     }
 
     std::cout << value << std::endl;
-    for (int i = 0; i < seq_count; i++) {
-        std::cout << i << ": ";
-        print_sequence(sequences[i]);
+    for (int curr_idx = 0; curr_idx < seq_count; curr_idx++) {
+        std::cout << curr_idx << ": ";
+        print_sequence(sequences[curr_idx]);
     }
 
     std::cout << "Index: ";
@@ -95,6 +99,45 @@ int select_sequence(const char* value) {
     return index;
 }
 
+int select_any_sequence(const char* value, bool& is_bit_sequence) {
+    if (seq_count == 0 && bit_seq_count == 0) {
+        std::cout << "No sequences created" << std::endl;
+        return -1;
+    }
+
+    std::cout << value << std::endl;
+
+    int global_idx = 0;
+    for (int curr_idx = 0; curr_idx < seq_count; curr_idx++) {
+        std::cout << global_idx << " (Sequence<int>): ";
+        print_sequence(sequences[curr_idx]);
+        global_idx++;
+    }
+
+    for (int curr_idx = 0; curr_idx < bit_seq_count; curr_idx++) {
+        std::cout << global_idx << " (BitSequence): ";
+        print_bit_sequence(bit_sequences[curr_idx]);
+        global_idx++;
+    }
+
+    std::cout << "Index: ";
+    int index;
+    read_int(index);
+
+    if (index < 0 || index >= seq_count + bit_seq_count) {
+        std::cout << "Invalid index" << std::endl;
+        return -1;
+    }
+
+    if (index < seq_count) {
+        is_bit_sequence = false;
+        return index;
+    }
+
+    is_bit_sequence = true;
+    return index - seq_count;
+}
+
 int select_bit_sequence(const char* value) {
     if (bit_seq_count == 0) {
         std::cout << "No BitSequences created" << std::endl;
@@ -102,9 +145,9 @@ int select_bit_sequence(const char* value) {
     }
     
     std::cout << value << std::endl;
-    for (int i = 0; i < bit_seq_count; i++) {
-        std::cout << i << ": ";
-        print_bit_sequence(bit_sequences[i]);
+    for (int curr_idx = 0; curr_idx < bit_seq_count; curr_idx++) {
+        std::cout << curr_idx << ": ";
+        print_bit_sequence(bit_sequences[curr_idx]);
     }
 
     std::cout << "Index: ";
@@ -142,8 +185,8 @@ void menu_create_sequence() {
         read_int(n);
 
         BitSequence* bs = new BitSequence();
-        for (int i = 0; i < n; i++) {
-            std::cout << "Bit " << i << " (0/1): ";
+        for (int curr_idx = 0; curr_idx < n; curr_idx++) {
+            std::cout << "Bit " << curr_idx << " (0/1): ";
             int val;
             read_int(val);
             bs->append(Bit(val));
@@ -181,8 +224,8 @@ void menu_create_sequence() {
             return;
     }
 
-    for (int i = 0; i < n; i++) {
-        std::cout << "Element " << i << ": ";
+    for (int idx = 0; idx < n; idx++) {
+        std::cout << "Element " << idx << ": ";
         int val;
         read_int(val);
         Sequence<int>* result = seq->append(val);
@@ -217,15 +260,17 @@ void menu_print_sequence() {
         std::cout << "No sequences created" << std::endl;
         return;
     }
+
     std::cout << "\n--- Sequence<int> ---" << std::endl;
-    for (int i = 0; i < seq_count; i++) {
-        std::cout << "[" << i << "]: ";
-        print_sequence(sequences[i]);
+    for (int idx = 0; idx < seq_count; idx++) {
+        std::cout << "[" << idx << "]: ";
+        print_sequence(sequences[idx]);
     }
+
     std::cout << "\n--- BitSequence ---" << std::endl;
-    for (int i = 0; i < bit_seq_count; i++) {
-        std::cout << "[" << i << "]: ";
-        print_bit_sequence(bit_sequences[i]);
+    for (int idx = 0; idx < bit_seq_count; idx++) {
+        std::cout << "[" << idx << "]: ";
+        print_bit_sequence(bit_sequences[idx]);
     }
 }
 
@@ -243,18 +288,19 @@ void menu_get_element() {
     }
 
     EnumeratorWrapper<int> iter(sequences[index]->get_enumerator());
-    int i = 0;
+    int idx = 0;
     while (iter.move_next()) {
-        if (i == pos) {
+        if (idx == pos) {
             std::cout << "Element: " << iter.get_current() << std::endl;
             return;
         }
-        i++;
+        idx++;
     }
 }
 
 void menu_get_subsequence() {
-    int index = select_sequence("Select sequence:");
+    bool is_bit_sequence = false;
+    int index = select_any_sequence("Select sequence:", is_bit_sequence);
     if (index == -1) return;
 
     std::cout << "Start index: ";
@@ -265,16 +311,32 @@ void menu_get_subsequence() {
     read_int(end);
 
     try {
-        Sequence<int>* sub = sequences[index]->get_sub_sequence(start, end);
-        std::cout << "Subsequence: ";
-        print_sequence(sub);
+        if (is_bit_sequence) {
+            Sequence<Bit>* sub = bit_sequences[index]->get_sub_sequence(start, end);
+            BitSequence* bit_sub = static_cast<BitSequence*>(sub);
 
-        if (seq_count < MAX_SEQUENCES) {
-            sequences[seq_count++] = sub;
-            std::cout << "Saved as index " << seq_count - 1 << std::endl;
+            std::cout << "Subsequence: ";
+            print_bit_sequence(bit_sub);
+
+            if (bit_seq_count < MAX_SEQUENCES) {
+                bit_sequences[bit_seq_count++] = bit_sub;
+                std::cout << "Saved as bit index " << bit_seq_count - 1 << std::endl;
+            } else {
+                delete bit_sub;
+                std::cout << "No space to save, result deleted" << std::endl;
+            }
         } else {
-            delete sub;
-            std::cout << "No space to save, result deleted" << std::endl;
+            Sequence<int>* sub = sequences[index]->get_sub_sequence(start, end);
+            std::cout << "Subsequence: ";
+            print_sequence(sub);
+
+            if (seq_count < MAX_SEQUENCES) {
+                sequences[seq_count++] = sub;
+                std::cout << "Saved as index " << seq_count - 1 << std::endl;
+            } else {
+                delete sub;
+                std::cout << "No space to save, result deleted" << std::endl;
+            }
         }
     } catch (const std::out_of_range& e) {
         std::cout << "Error: " << e.what() << std::endl;
@@ -416,15 +478,15 @@ void menu_split() {
     std::cout << "Split into " << result->get_count() << " fragments:" << std::endl;
 
     EnumeratorWrapper<Sequence<int>*> iter(result->get_enumerator());
-    int i = 0;
+    int curr_idx = 0;
     while (iter.move_next()) {
         Sequence<int>* fragment = iter.get_current();
-        std::cout << "  [" << i << "]: ";
+        std::cout << "  [" << curr_idx << "]: ";
 
         print_sequence(iter.get_current());
 
         delete fragment;
-        i++;
+        curr_idx++;
     }
     delete result;
 }
@@ -449,8 +511,8 @@ void menu_slice() {
     if (rep_count > 0) {
         replacement = new MutableArraySequence<int>();
 
-        for (int i = 0; i < rep_count; i++) {
-            std::cout << "Replacement element " << i << ": ";
+        for (int curr_idx = 0; curr_idx < rep_count; curr_idx++) {
+            std::cout << "Replacement element " << curr_idx << ": ";
             int val;
             read_int(val);
             replacement->append(val);
@@ -555,11 +617,11 @@ void run_menu() {
         }
     }
 
-    for (int i = 0; i < seq_count; i++) {
-        delete sequences[i];
+    for (int curr_idx = 0; curr_idx < seq_count; curr_idx++) {
+        delete sequences[curr_idx];
     }
 
-    for (int i = 0; i < bit_seq_count; i++) {
-        delete bit_sequences[i];
+    for (int curr_idx = 0; curr_idx < bit_seq_count; curr_idx++) {
+        delete bit_sequences[curr_idx];
     }
 }

@@ -7,21 +7,20 @@ LinkedList<T>::LinkedList(): head(nullptr), tail(nullptr), length(0) { // Соз
 
 template <class T>
 LinkedList<T>::LinkedList(const T* items, int count): head(nullptr), tail(nullptr), length(count) { // Создать список из списка элементов и их количества
-
+    if (length < 0) throw std::out_of_range("Length must be >= 0");
     if (length == 0) return;
 
     head = new Node{items[0], nullptr}; // Первый узел
     tail = head; // смотрит за концом
     
-    for (int i = 1; i < length; i++) {
-        tail->next = new Node{items[i], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
+    for (int curr_idx = 1; curr_idx < length; curr_idx++) {
+        tail->next = new Node{items[curr_idx], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
         tail = tail->next; // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
     }
 }
 
 template <class T>
 LinkedList<T>::LinkedList(const LinkedList<T>& other): head(nullptr), tail(nullptr), length(other.length) {
-
     if (other.head == nullptr) return;
 
     head = new Node{other.head->data, nullptr};
@@ -62,9 +61,7 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
 
 template <class T>
 const T& LinkedList<T>::get_first() const {
-    if (head == nullptr) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (head == nullptr) throw std::out_of_range("Index out of range");
 
     return head->data;
 }
@@ -72,21 +69,9 @@ const T& LinkedList<T>::get_first() const {
 template <class T>
 const T& LinkedList<T>::get_last() const {
     if (length == 0) throw std::out_of_range("List is empty");
+
     return tail->data;
 }
-
-// template <class T>
-// const T& LinkedList<T>::get(int index) const {
-//     if (index < 0 || index >= length) throw std::out_of_range("Index out of range");
-
-//     Node* current = head;
-
-//     for (int i = 0; i < index; i++) {
-//         current = current->next;
-//     }
-
-//     return current->data;
-// }
 
 template <class T>
 int LinkedList<T>::get_length() const {
@@ -104,14 +89,14 @@ LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
 
     Node* current = head;
 
-    for (int i = 0; i < start; i++) {
+    for (int curr_idx = 0; curr_idx < start; curr_idx++) {
         current = current->next;
     }
 
     sub_list->head = new Node{current->data, nullptr};
     sub_list->tail = sub_list->head;
 
-    for (int i = 0; i < end - start; i++) {
+    for (int curr_idx = 0; curr_idx < end - start; curr_idx++) {
         current = current->next;
         sub_list->tail->next = new Node{current->data, nullptr};
         sub_list->tail = sub_list->tail->next;
@@ -122,7 +107,6 @@ LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
 
 template <class T>
 void LinkedList<T>::append(const T& item) {
-
     Node* new_node = new Node{item, nullptr};
 
     if (head == nullptr) {
@@ -132,14 +116,13 @@ void LinkedList<T>::append(const T& item) {
         tail->next = new_node;
         tail = tail->next;    
     }
-
     length++;
+
     return;
 }
 
 template <class T>
 void LinkedList<T>::prepend(const T& item) {
-
     Node* new_node = new Node{item, nullptr};
 
     if (head == nullptr) {
@@ -149,14 +132,13 @@ void LinkedList<T>::prepend(const T& item) {
         new_node->next = head;  
         head = new_node;
     }
-
     length++;
+
     return;
 }
 
 template <class T>
 void LinkedList<T>::insert_at(const T& item, int index) {
-
     if (index < 0 || index > length) {
         throw std::out_of_range("Index out of range");
     }
@@ -174,25 +156,26 @@ void LinkedList<T>::insert_at(const T& item, int index) {
     Node* new_node = new Node{item, nullptr};
     Node* current = head;
 
-    for (int i = 0; i < index - 1; i++) {
+    for (int curr_idx = 0; curr_idx < index - 1; curr_idx++) {
         current = current->next;
     }
 
     new_node->next = current->next;
     current->next = new_node;
- 
     length++;
+
     return;
 }
 
 template <class T>
 LinkedList<T>* LinkedList<T>::concat(const LinkedList<T>* other) {
+    if (other == nullptr) throw std::invalid_argument("Cannot concat with nullptr");
 
     LinkedList<T>* concat_list = new LinkedList<T>();
 
     Node* current = head;
 
-    for (int i = 0; i < length; i++) {
+    for (int curr_idx = 0; curr_idx < length; curr_idx++) {
         concat_list->append(current->data);
         current = current->next;
     }
@@ -209,13 +192,11 @@ LinkedList<T>* LinkedList<T>::concat(const LinkedList<T>* other) {
 
 template <class T>
 LinkedList<T>::~LinkedList() {
-    
     Node* current = head;
 
-    for (int i = 0; i < length; i++) {
+    for (int curr_idx = 0; curr_idx < length; curr_idx++) {
         Node* tmp = current;
         current = current->next;
         delete tmp;
     }
-
 }

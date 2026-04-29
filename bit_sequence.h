@@ -12,6 +12,7 @@ class BitSequence : public Sequence<Bit> {
         
         bool get_bit(int index) const;
         void set_bit(int index, bool value);
+        void clear_unused_bits();
 
         static int check_bytes_needed(int n); // Количество байт, необходимое для хранения n бит
     protected:
@@ -32,17 +33,9 @@ class BitSequence : public Sequence<Bit> {
 
         int get_count() const override;
 
-        Sequence<Bit>* get_sub_sequence(int start, int end) override;
-
         Sequence<Bit>* append(const Bit& item) override;
         Sequence<Bit>* prepend(const Bit& item) override;
         Sequence<Bit>* insert_at(const Bit& item, int index) override;
-
-        // Sequence<Bit>* concat(const Sequence<Bit>* other) override;
-        // Sequence<Bit>* map(Bit (*func)(const Bit& elem)) override;
-        // Sequence<Bit>* where(bool (*predicate)(const Bit& elem)) override;
-        // Bit reduce(Bit (*func)(const Bit& first_elem, const Bit& second_elem), const Bit& initial_elem) override;
-        // Sequence<Sequence<Bit>*>* split(bool (*predicate)(const Bit&));
 
         BitSequence* bit_and(const BitSequence& other) const; // И
         BitSequence* bit_or(const BitSequence& other) const; // ИЛИ
