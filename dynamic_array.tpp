@@ -19,8 +19,8 @@ DynamicArray<T>::DynamicArray(const T* items, int count): size(count) {
 
     data = new T[size];
 
-    for (int curr_idx = 0; curr_idx < size; curr_idx++) {
-        data[curr_idx] = items[curr_idx];
+    for (int idx = 0; idx < size; idx++) {
+        data[idx] = items[idx];
     }
 }
 
@@ -28,8 +28,8 @@ template <class T>
 DynamicArray<T>::DynamicArray(const DynamicArray<T>& other): size(other.size) {
     data = new T[size];
 
-    for (int curr_idx = 0; curr_idx < size; curr_idx++) {
-        data[curr_idx] = other.data[curr_idx];
+    for (int idx = 0; idx < size; idx++) {
+        data[idx] = other.data[idx];
     }
 }
 
@@ -41,8 +41,8 @@ DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& other) {
     size = other.size;
     data = new T[size];
 
-    for (int curr_idx = 0; curr_idx < size; curr_idx++) {
-        data[curr_idx] = other.data[curr_idx];
+    for (int idx = 0; idx < size; idx++) {
+        data[idx] = other.data[idx];
     }
 
     return *this;
@@ -50,9 +50,7 @@ DynamicArray<T>& DynamicArray<T>::operator=(const DynamicArray<T>& other) {
 
 template <class T>
 const T& DynamicArray<T>::get(int index) const {
-    if (index >= size || index < 0) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (index >= size || index < 0) throw std::out_of_range("Index out of range");
 
     return data[index];
 }
@@ -64,9 +62,8 @@ int DynamicArray<T>::get_size() const {
 
 template <class T>
 void DynamicArray<T>::set(int index, const T& value) {
-    if (index >= size || index < 0) {
-        throw std::out_of_range("Index out of range");
-    }
+    if (index >= size || index < 0) throw std::out_of_range("Index out of range");
+
     data[index] = value;
 }
 
@@ -76,10 +73,10 @@ void DynamicArray<T>::resize(int new_size) {
 
     T* new_data = new T[new_size];
 
-    int mainSize = (new_size < size) ?  new_size : size;
+    int main_size = (new_size < size) ?  new_size : size;
 
-    for (int curr_idx = 0; curr_idx < mainSize; curr_idx++) {
-        new_data[curr_idx] = data[curr_idx];
+    for (int idx = 0; idx < main_size; idx++) {
+        new_data[idx] = data[idx];
     }
 
     delete[] data;

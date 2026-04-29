@@ -13,8 +13,8 @@ LinkedList<T>::LinkedList(const T* items, int count): head(nullptr), tail(nullpt
     head = new Node{items[0], nullptr}; // Первый узел
     tail = head; // смотрит за концом
     
-    for (int curr_idx = 1; curr_idx < length; curr_idx++) {
-        tail->next = new Node{items[curr_idx], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
+    for (int idx = 1; idx < length; idx++) {
+        tail->next = new Node{items[idx], nullptr}; // next начинает указывать на следующий узел, в котором уже другой next указывает на null
         tail = tail->next; // сдвигаем tail(теперь указывает на ноду, на которую указывает next)
     }
 }
@@ -89,14 +89,14 @@ LinkedList<T>* LinkedList<T>::get_sub_list(int start, int end) {
 
     Node* current = head;
 
-    for (int curr_idx = 0; curr_idx < start; curr_idx++) {
+    for (int idx = 0; idx < start; idx++) {
         current = current->next;
     }
 
     sub_list->head = new Node{current->data, nullptr};
     sub_list->tail = sub_list->head;
 
-    for (int curr_idx = 0; curr_idx < end - start; curr_idx++) {
+    for (int idx = 0; idx < end - start; idx++) {
         current = current->next;
         sub_list->tail->next = new Node{current->data, nullptr};
         sub_list->tail = sub_list->tail->next;
@@ -156,7 +156,7 @@ void LinkedList<T>::insert_at(const T& item, int index) {
     Node* new_node = new Node{item, nullptr};
     Node* current = head;
 
-    for (int curr_idx = 0; curr_idx < index - 1; curr_idx++) {
+    for (int idx = 0; idx < index - 1; idx++) {
         current = current->next;
     }
 
@@ -175,14 +175,14 @@ LinkedList<T>* LinkedList<T>::concat(const LinkedList<T>* other) {
 
     Node* current = head;
 
-    for (int curr_idx = 0; curr_idx < length; curr_idx++) {
+    for (int idx = 0; idx < length; idx++) {
         concat_list->append(current->data);
         current = current->next;
     }
 
     current = other->head;
 
-    for (int i = 0; i < other->length; i++) {
+    for (int idx = 0; idx < other->length; idx++) {
         concat_list->append(current->data);
         current = current->next;
     }
@@ -194,7 +194,7 @@ template <class T>
 LinkedList<T>::~LinkedList() {
     Node* current = head;
 
-    for (int curr_idx = 0; curr_idx < length; curr_idx++) {
+    for (int idx = 0; idx < length; idx++) {
         Node* tmp = current;
         current = current->next;
         delete tmp;
