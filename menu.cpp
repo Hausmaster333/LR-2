@@ -145,9 +145,9 @@ int select_bit_sequence(const char* value) {
     }
     
     std::cout << value << std::endl;
-    for (int curr_idx = 0; curr_idx < bit_seq_count; curr_idx++) {
-        std::cout << curr_idx << ": ";
-        print_bit_sequence(bit_sequences[curr_idx]);
+    for (int idx = 0; idx < bit_seq_count; idx++) {
+        std::cout << idx << ": ";
+        print_bit_sequence(bit_sequences[idx]);
     }
 
     std::cout << "Index: ";
