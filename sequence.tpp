@@ -47,7 +47,7 @@ Sequence<T>* Sequence<T>::slice(int index, int count, const Sequence<T>* replace
 }
 
 template <class T>
-T Sequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), const T& initial_elem) const {
+T Sequence<T>::reduce(T (*func)(const T& accumulator, const T& current), const T& initial_elem) const {
     if (func == nullptr) throw std::invalid_argument("Cannot reduce with nullptr function");
 
     T reduced_elem = initial_elem;
@@ -55,7 +55,7 @@ T Sequence<T>::reduce(T (*func)(const T& first_elem, const T& second_elem), cons
     EnumeratorWrapper<T> iter(get_enumerator());
     while (iter.move_next()) {
         T current_elem = iter.get_current();
-        reduced_elem = func(current_elem, reduced_elem);
+        reduced_elem = func(reduced_elem, current_elem);
     }
 
     return reduced_elem;
