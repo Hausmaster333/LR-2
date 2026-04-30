@@ -63,12 +63,12 @@ BitSequence::BitSequence(const Bit* items, int count) : bit_count(count), cached
     int bytes = check_bytes_needed(count);
     data = DynamicArray<unsigned char>(bytes);
 
-    for (int curr_idx = 0; curr_idx < bytes; curr_idx++) { // Зануляем все байты
-        data.set(curr_idx, 0);
+    for (int idx = 0; idx < bytes; idx++) { // Зануляем все байты
+        data.set(idx, 0);
     }
 
-    for (int curr_idx = 0; curr_idx < count; curr_idx++) { // Заполняем байты битами
-        set_bit(curr_idx, items[curr_idx].get());
+    for (int idx = 0; idx < count; idx++) { // Заполняем байты битами
+        set_bit(idx, items[idx].get());
     }
 }
 
@@ -145,17 +145,17 @@ Sequence<Bit>* BitSequence::prepend(const Bit& item) {
     int new_bytes = check_bytes_needed(new_count);
     data.resize(new_bytes);
 
-    for (int curr_idx = 0; curr_idx < new_bytes; curr_idx++) {
-        data.set(curr_idx, 0);
+    for (int idx = 0; idx < new_bytes; idx++) {
+        data.set(idx, 0);
     }
 
     bit_count = new_count;
 
     set_bit(0, item.get());
-    for (int curr_idx = 0; curr_idx < old_count; curr_idx++) {
-        unsigned char old_byte = old_data->get(curr_idx / 8);
-        bool val = (old_byte >> (curr_idx % 8)) & 1;
-        set_bit(curr_idx + 1, val);
+    for (int idx = 0; idx < old_count; idx++) {
+        unsigned char old_byte = old_data->get(idx / 8);
+        bool val = (old_byte >> (idx % 8)) & 1;
+        set_bit(idx + 1, val);
     }
     delete old_data;
 
@@ -172,24 +172,24 @@ Sequence<Bit>* BitSequence::insert_at(const Bit& item, int index) {
     int new_bytes = check_bytes_needed(new_count);
     data.resize(new_bytes);
 
-    for (int curr_idx = 0; curr_idx < new_bytes; curr_idx++) {
-        data.set(curr_idx, 0);
+    for (int idx = 0; idx < new_bytes; idx++) {
+        data.set(idx, 0);
     }
 
     bit_count = new_count;
 
-    for (int curr_idx = 0; curr_idx < index; curr_idx++) {
-        unsigned char old_byte = old_data.get(curr_idx / 8);
-        bool val = (old_byte >> (curr_idx % 8)) & 1;
-        set_bit(curr_idx, val);
+    for (int idx = 0; idx < index; idx++) {
+        unsigned char old_byte = old_data.get(idx / 8);
+        bool val = (old_byte >> (idx % 8)) & 1;
+        set_bit(idx, val);
     }
 
     set_bit(index, item.get());
 
-    for (int curr_idx = index; curr_idx < old_count; curr_idx++) {
-        unsigned char old_byte = old_data.get(curr_idx / 8);
-        bool val = (old_byte >> (curr_idx % 8)) & 1;
-        set_bit(curr_idx + 1, val);
+    for (int idx = index; idx < old_count; idx++) {
+        unsigned char old_byte = old_data.get(idx / 8);
+        bool val = (old_byte >> (idx % 8)) & 1;
+        set_bit(idx + 1, val);
     }
 
     return this;
@@ -203,8 +203,8 @@ BitSequence* BitSequence::bit_and(const BitSequence& other) const {
     and_bit_seq->data.resize(min_bytes);
     and_bit_seq->bit_count = min_count;
 
-    for (int curr_idx = 0; curr_idx < min_bytes; curr_idx++) {
-        and_bit_seq->data.set(curr_idx, data.get(curr_idx) & other.data.get(curr_idx));
+    for (int idx = 0; idx < min_bytes; idx++) {
+        and_bit_seq->data.set(idx, data.get(idx) & other.data.get(idx));
     }
 
     and_bit_seq->clear_unused_bits();
@@ -219,11 +219,11 @@ BitSequence* BitSequence::bit_or(const BitSequence& other) const {
     or_bit_seq->data.resize(max_bytes);
     or_bit_seq->bit_count = max_count;
 
-    for (int curr_idx = 0; curr_idx < max_bytes; curr_idx++) {
-        unsigned char a = (curr_idx < check_bytes_needed(bit_count)) ? data.get(curr_idx) : 0;
-        unsigned char b = (curr_idx < check_bytes_needed(other.bit_count)) ? other.data.get(curr_idx) : 0;
+    for (int idx = 0; idx < max_bytes; idx++) {
+        unsigned char a = (idx < check_bytes_needed(bit_count)) ? data.get(idx) : 0;
+        unsigned char b = (idx < check_bytes_needed(other.bit_count)) ? other.data.get(idx) : 0;
 
-        or_bit_seq->data.set(curr_idx, a | b);
+        or_bit_seq->data.set(idx, a | b);
     }
 
     or_bit_seq->clear_unused_bits();
@@ -256,8 +256,8 @@ BitSequence* BitSequence::bit_not() const {
     not_bit_seq->data.resize(bytes);
     not_bit_seq->bit_count = bit_count;
 
-    for (int curr_idx = 0; curr_idx < bytes; curr_idx++) {
-        not_bit_seq->data.set(curr_idx, ~data.get(curr_idx));
+    for (int idx = 0; idx < bytes; idx++) {
+        not_bit_seq->data.set(idx, ~data.get(idx));
     }
 
     not_bit_seq->clear_unused_bits();
